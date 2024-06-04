@@ -1,0 +1,115 @@
+openapi: 3.0.3
+info:
+  title: BitRuby auth service
+  description: Swagger for auth service
+  version: 1.0.0
+servers:
+  - url: /auth/api/v1
+    description: The URL prefix for API server
+tags:
+  - name: auth
+
+paths:
+  /oauth2/token:
+    post:
+      summary: Get access and refresh token by user password
+      operationId: getTokenByUserPassword
+      tags:
+        - auth
+      security:
+        - BasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/TokenRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/TokenResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+components:
+  responses:
+    Error:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    EmptyResponse:
+      description: >-
+        response with no body
+    TokenResponse:
+      description: >-
+        Token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Token'
+
+  requestBodies:
+    TokenRequest:
+      description: >-
+        Get token by grant type and password
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - grant_type
+              - username
+              - password
+              - scope
+            properties:
+              grant_type:
+                type: string
+                enum:
+                  - email_password
+                  - phone_password
+                default: phone_password
+              username:
+                type: string
+              password:
+                type: string
+                format: password
+              scope:
+                type: string
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: code of error
+          example: "10"
+        message:
+          type: string
+          description: code of error
+          example: Text about reaosn of error
+        payload:
+          type: array
+          items:
+            type: string
+            description: description
+            example: example
+    Token:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - expires_in
+      additionalProperties: true
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer

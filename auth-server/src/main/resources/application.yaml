@@ -1,0 +1,31 @@
+logging:
+  level:
+    org.springframework.security: TRACE
+spring:
+  application:
+    name: authorization-server
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=users
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        default_schema: users
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 9000
+  servlet:
+    context-path: /auth/api/v1
+  address: 127.0.0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+

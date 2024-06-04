@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: BitRuby users service
+  description: Swagger for users service
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: The URL prefix for API server
+tags:
+  - name: users
+
+paths:
+  /public/registration:
+    post:
+      summary: Register new user
+      operationId: registerUser
+      tags:
+        - users
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/RegisterNewUserRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/EmptyResponse'
+        '500':
+          $ref: '#/components/responses/Error'
+  /public/registration/complete-registration/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      summary: Complete registration of new user
+      description: >-
+        Complete registration of the user by email confirmation
+      operationId: completeRegistration
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '500':
+          $ref: '#/components/responses/Error'
+
+  /public:
+    get:
+      summary: Test
+      operationId: testPublic
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+  /secured:
+    get:
+      summary: Test
+      operationId: testAuth
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+
+components:
+  responses:
+    Error:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    EmptyResponse:
+      description: >-
+        response with no body
+
+  requestBodies:
+
+    RegisterNewUserRequest:
+      description: >-
+        Registration body of new user"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterUser'
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Id'
+  schemas:
+    Id:
+      type: string
+      format: uuid
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          description: code of error
+          example: "10"
+        message:
+          type: string
+          description: code of error
+          example: Text about reaosn of error
+        payload:
+          type: array
+          items:
+            type: string
+            description: description
+            example: example
+    RoleType:
+      type: string
+      enum:
+        - USER
+        - DEVELOPER
+        - ADMIN
+
+    RegisterUser:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        merchant:
+          type: string
+          format: uuid
+        role:
+          $ref: '#/components/schemas/RoleType'
+        isEnabled:
+          type: boolean
+        isRegistrationComplete:
+          type: boolean
+        isAccountNonLocked:
+          type: boolean
+        isCredentialsNonExpired:
+          type: boolean
