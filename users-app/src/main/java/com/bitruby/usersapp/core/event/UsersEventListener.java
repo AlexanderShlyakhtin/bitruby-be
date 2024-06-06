@@ -1,8 +1,12 @@
 package com.bitruby.usersapp.core.event;
 
+import com.bitruby.usersapp.api.model.GrantType;
+import com.bitruby.usersapp.api.model.OtpCode;
+import com.bitruby.usersapp.core.otp.OtpService;
+import com.bitruby.usersapp.core.users.UsersService;
 import com.bitruby.usersapp.outcomes.postgres.entity.AuthorityRoleEnum;
-import com.bitruby.usersapp.outcomes.postgres.entity.VerificationTokenEntity;
-import com.bitruby.usersapp.outcomes.postgres.repository.VerificationTokenRepository;
+import com.bitruby.usersapp.outcomes.postgres.entity.OtpTokenEntity;
+import com.bitruby.usersapp.outcomes.postgres.repository.OtpTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,27 +20,21 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UsersEventListener {
 
-  @Value("${bitruby.users-app.complete-registration-url}")
-  private String registrationLink;
+  private final OtpService otpService;
 
-  private final VerificationTokenRepository tokenRepository;
-
-  @EventListener({NewUserRegistrationEvent.class})
+  @EventListener(NewUserRegistrationEvent.class)
   public void newUserEventListener(NewUserRegistrationEvent event) {
 
-    UUID token = UUID.randomUUID();
-    String formattedLink = String.format("%s/%s", registrationLink, token);
-
-    //sendVerificationEmail()
-
-    log.info("User created. Mail with link on password creation sent on {}. Link: {}",
-        event.getUser().getEmail(), formattedLink);
-    tokenRepository.save(new VerificationTokenEntity(event.getUser(), AuthorityRoleEnum.USER.getValue(), token, true));
+    log.info("User created. Mail with link on password creation sent on {}",
+        event.getUser().getEmail());
+    OtpCode otpCode = new OtpCode();
+    otpCode.setGrantType(GrantType.EMAIL_PASSWORD);
+    otpCode.setSendTo(event.getUser().getEmail());
+    otpService.generateOtpCodeForLogin(otpCode);
   }
 
-  @EventListener({UserCompleteRegistrationEvent.class})
-  public void userCompleteRegistrationEventEventListener(NewUserRegistrationEvent event) {
-
+  @EventListener(UserCompleteRegistrationEvent.class)
+  public void userCompleteRegistrationEventEventListener(UserCompleteRegistrationEvent event) {
     log.info("User complete registration with email {}",
         event.getUser().getEmail());
   }

@@ -24,13 +24,13 @@ paths:
           $ref: '#/components/responses/EmptyResponse'
         '500':
           $ref: '#/components/responses/Error'
-  /public/registration/complete-registration/{id}:
-    parameters:
-      - $ref: '#/components/parameters/Id'
+  /public/registration/complete-registration:
     post:
       summary: Complete registration of new user
       description: >-
         Complete registration of the user by email confirmation
+      requestBody:
+        $ref: '#/components/requestBodies/CheckOtpCodeRequest'
       operationId: completeRegistration
       tags:
         - users
@@ -39,26 +39,21 @@ paths:
           $ref: '#/components/responses/EmptyResponse'
         '500':
           $ref: '#/components/responses/Error'
-
-  /public:
-    get:
-      summary: Test
-      operationId: testPublic
+  /public/generate-otp:
+    post:
+      summary: Generate and send OTP code for login
+      operationId: generateOtpCodeForLogin
       tags:
-        - users
+        - otp
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateOtpCodeRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
-  /secured:
-    get:
-      summary: Test
-      operationId: testAuth
-      tags:
-        - users
-      responses:
-        '200':
-          $ref: '#/components/responses/EmptyResponse'
-
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
 components:
   responses:
     Error:
@@ -72,7 +67,20 @@ components:
         response with no body
 
   requestBodies:
-
+    GenerateOtpCodeRequest:
+      description: >-
+        Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpCode'
+    CheckOtpCodeRequest:
+      description: >-
+        Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpCodeCheck'
     RegisterNewUserRequest:
       description: >-
         Registration body of new user"
@@ -81,16 +89,22 @@ components:
           schema:
             $ref: '#/components/schemas/RegisterUser'
   parameters:
-    Id:
-      name: id
+    Token:
+      name: token
       in: path
       required: true
       schema:
-        $ref: '#/components/schemas/Id'
+        $ref: '#/components/schemas/Otp'
+
   schemas:
+
     Id:
       type: string
       format: uuid
+    Otp:
+      type: string
+      maxLength: 6
+      minLength: 6
     Error:
       type: object
       properties:
@@ -108,6 +122,12 @@ components:
             type: string
             description: description
             example: example
+    GrantType:
+      type: string
+      enum:
+        - email_password
+        - phone_password
+
     RoleType:
       type: string
       enum:
@@ -153,3 +173,24 @@ components:
           type: boolean
         isCredentialsNonExpired:
           type: boolean
+
+    OtpCodeCheck:
+      allOf:
+        - type: object
+          required:
+            - otp
+          properties:
+            otp:
+              $ref: '#/components/schemas/Otp'
+        - $ref: '#/components/schemas/OtpCode'
+
+    OtpCode:
+      type: object
+      required:
+        - grant_type
+        - sendTo
+      properties:
+        grant_type:
+          $ref: '#/components/schemas/GrantType'
+        sendTo:
+          type: string

@@ -1,41 +1,32 @@
-package com.bitruby.usersapp.outcomes.postgres.entity;
+package com.bitruby.authserver.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Table(name = "verification_token")
-public class VerificationTokenEntity {
+@Table(name = "otp_token")
+public class OtpTokenEntity {
 
-  //Expiration time 30 miutes
   private static final int EXPIRATION_TIME = 30;
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
-  private UUID token;
-  private String role;
+  private String id;
+  private String token;
   private Date expirationTime;
-  @OneToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "user_id",
-      nullable = false,
-      foreignKey = @ForeignKey(name = "FK_USER_VERIFY_TOKEN"))
-  private UserEntity user;
   private Boolean valid;
 
-  public VerificationTokenEntity(UserEntity user, String role, UUID token, Boolean valid) {
-    super();
+  public OtpTokenEntity(String id, String token, Boolean valid) {
+    this.id = id;
     this.token = token;
-    this.user = user;
-    this.role = role;
     this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);
     this.valid = valid;
   }

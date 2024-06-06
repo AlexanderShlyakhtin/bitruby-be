@@ -1,5 +1,6 @@
 package com.bitruby.usersapp.incomes;
 
+import com.bitruby.usersapp.api.model.OtpCodeCheck;
 import com.bitruby.usersapp.core.users.UsersService;
 import com.bitruby.usersapp.api.UsersApiDelegate;
 import com.bitruby.usersapp.api.model.RegisterUser;
@@ -30,38 +31,16 @@ public class UsersController implements UsersApiDelegate {
   }
 
   /**
-   * POST /public/registration/complete-registration/{id} : Complete registration of new user
-   * Complete registration of the user by email confirmation
+   * POST /public/registration/complete-registration : Complete registration of new user Complete
+   * registration of the user by email confirmation
    *
-   * @param id (required)
+   * @param otpCodeCheck Generate OTP token for user login (optional)
    * @return response with no body (status code 200) or error (status code 500)
    * @see UsersApi#completeRegistration
    */
   @Override
-  public ResponseEntity<Void> completeRegistration(UUID id) {
-    usersService.completeRegistration(id);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  /**
-   * GET /secured : Test
-   *
-   * @return response with no body (status code 200)
-   * @see UsersApi#testAuth
-   */
-  @Override
-  public ResponseEntity<Void> testAuth() {
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  /**
-   * GET /public : Test
-   *
-   * @return response with no body (status code 200)
-   * @see UsersApi#testPublic
-   */
-  @Override
-  public ResponseEntity<Void> testPublic() {
+  public ResponseEntity<Void> completeRegistration(OtpCodeCheck otpCodeCheck) {
+    usersService.completeRegistration(otpCodeCheck);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

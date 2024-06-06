@@ -8,6 +8,7 @@ servers:
     description: The URL prefix for API server
 tags:
   - name: auth
+  - name: otp
 
 paths:
   /oauth2/token:
@@ -17,7 +18,7 @@ paths:
       tags:
         - auth
       security:
-        - BasicAuth: []
+        - basicAuth: []
       requestBody:
         $ref: '#/components/requestBodies/TokenRequest'
       responses:
@@ -29,6 +30,7 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   responses:
+
     Error:
       description: error
       content:
@@ -45,7 +47,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Token'
-
   requestBodies:
     TokenRequest:
       description: >-
@@ -61,11 +62,7 @@ components:
               - scope
             properties:
               grant_type:
-                type: string
-                enum:
-                  - email_password
-                  - phone_password
-                default: phone_password
+                $ref: '#/components/schemas/GrantType'
               username:
                 type: string
               password:
@@ -73,10 +70,13 @@ components:
                 format: password
               scope:
                 type: string
+              otpCode:
+                type: string
   securitySchemes:
-    BasicAuth:
+    basicAuth:
       type: http
       scheme: basic
+      description: Use `user` / `passwd` as the test credentials
 
   schemas:
     Error:
@@ -96,6 +96,12 @@ components:
             type: string
             description: description
             example: example
+    GrantType:
+      type: string
+      enum:
+        - email_password
+        - phone_password
+      default: phone_password
     Token:
       type: object
       required:

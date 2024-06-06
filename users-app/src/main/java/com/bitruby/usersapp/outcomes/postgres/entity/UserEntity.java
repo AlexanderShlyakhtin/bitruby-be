@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @Table(name = "users", schema = "users")
-public class UserEntity {
+public class UserEntity implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -23,6 +24,7 @@ public class UserEntity {
   private String email;
   private String firstName;
   private String lastName;
+  private String phone;
 
   @NotNull
   private String password;

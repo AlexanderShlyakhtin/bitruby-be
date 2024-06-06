@@ -16,12 +16,14 @@ public class PhonePasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
   private final String username;
   private final String password;
   private final Set<String> scopes;
+  private final String otp;
 
   public PhonePasswordAuthenticationToken(Authentication clientPrincipal,
-      @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters) {
+      @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters, String otp) {
     super(new AuthorizationGrantType("phone_password"), clientPrincipal, additionalParameters);
     this.username = (String) additionalParameters.get("username");
     this.password = (String) additionalParameters.get("password");
+    this.otp = (String) additionalParameters.get("otp");
     this.scopes = Collections.unmodifiableSet(
         scopes != null ? new HashSet<>(scopes) : Collections.emptySet());
   }
@@ -36,5 +38,9 @@ public class PhonePasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
 
   public Set<String> getScopes() {
     return this.scopes;
+  }
+
+  public String getOtp() {
+    return otp;
   }
 }

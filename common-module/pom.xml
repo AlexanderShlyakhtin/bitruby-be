@@ -116,6 +116,31 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${version-openapi-generator}</version>
+                <executions>
+                    <execution>
+                        <id>generate-auth-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-auth-swagger.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.bitruby.authserver.api</apiPackage>
+                            <modelPackage>com.bitruby.authserver.api.model</modelPackage>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <configOptions>
+                                <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
+                                <useTags>true</useTags>
+                                <delegatePattern>true</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -68,8 +68,14 @@ public class EmailPasswordAuthenticationConverter implements AuthenticationConve
       }
     });
 
+    String otp = parameters.getFirst("otp");
+    if (!StringUtils.hasText(otp)) {
+      throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
+    }
+
     Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
-    return new EmailPasswordAuthenticationToken(clientPrincipal, requestedScopes, additionalParameters);
+    return new EmailPasswordAuthenticationToken(clientPrincipal, requestedScopes, additionalParameters,
+        otp);
   }
 
   private static MultiValueMap<String, String> getParameters(HttpServletRequest request) {

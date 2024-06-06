@@ -2,6 +2,7 @@ package com.bitruby.authserver.config.customGrantTypes.phonePassword;
 
 import com.bitruby.authserver.config.model.CustomPasswordUser;
 import com.bitruby.authserver.service.CustomUserDetails;
+import com.bitruby.authserver.service.OtpService;
 import com.bitruby.authserver.service.UserDetailsByPhoneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -36,6 +37,8 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
 
   @Autowired
   private UserDetailsByPhoneService userDetailsService;
+  @Autowired
+  private OtpService otpService;
 
   private static final String ERROR_URI = "https://datatracker.ietf.org/doc/html/rfc6749#section-5.2";
   private final OAuth2AuthorizationService authorizationService;
@@ -43,6 +46,7 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
   private String username = "";
   private String password = "";
+  private String otp = "";
   private Set<String> authorizedScopes = new HashSet<>();
 
   public PhonePasswordAuthenticationProvider(
@@ -64,6 +68,7 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
     RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
     username = customPasswordAuthenticationToken.getUsername();
     password = customPasswordAuthenticationToken.getPassword();
+    otp = customPasswordAuthenticationToken.getOtp();
     CustomUserDetails user = null;
     try {
       user = userDetailsService.loadUserByUsername(username);
@@ -71,6 +76,9 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
     if (!passwordEncoder.matches(password, user.getPassword()) || !user.getPhone().equals(username)) {
+      throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
+    }
+    if(!otpService.checkAndUseOtpCode(username, otp)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
     authorizedScopes = user.getAuthorities().stream()

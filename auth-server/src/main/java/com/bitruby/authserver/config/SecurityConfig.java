@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -86,8 +87,11 @@ public class SecurityConfig {
             .authenticationProviders(getProviders())
         )
         .oidc(withDefaults());
-    http.cors(cors -> cors.configurationSource(corsFilter()));
-    http.headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer.addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://127.0.0.1:4200")));
+
+    http.headers(httpSecurityHeadersConfigurer ->
+        httpSecurityHeadersConfigurer
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://127.0.0.1:4200")));
+    http.cors(cors -> cors.configure(http));
     http.exceptionHandling(e -> e
         .defaultAuthenticationEntryPointFor(
             new LoginUrlAuthenticationEntryPoint("/login"),
@@ -167,43 +171,6 @@ public class SecurityConfig {
         .build();
   }
 
-//  @Bean
-//  public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(UserInfoService userInfoService) {
-//    return context -> {
-//      if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-//        String name = context.getPrincipal().getName();
-//        UserEntity userInfo = userInfoService.getUserInfo(name);
-//        context.getClaims().claim("role", userInfo.getRole());
-//      }
-//      if (OidcParameterNames.ID_TOKEN.equals(context.getTokenType().getValue())) {
-//        String name = context.getPrincipal().getName();
-//        UserEntity userInfo = userInfoService.getUserInfo(name);
-//      }
-//    };
-//  }
-
-  public CorsConfigurationSource corsFilter() {
-    CorsConfiguration configuration = new CorsConfiguration();
-
-    configuration.setAllowedOrigins(List.of("http://127.0.0.1:4200"));
-    configuration.setAllowedHeaders(List.of("*", "authorization"));
-    configuration.setAllowedMethods(
-        Arrays.asList("GET","POST", "OPTIONS", "HEAD", "DELETE", "PUT", "TRACE"));
-    configuration.setAllowCredentials(true);
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/.well-known/openid-configuration", configuration);
-    source.registerCorsConfiguration("/userinfo", configuration);
-    source.registerCorsConfiguration("/login", configuration);
-    source.registerCorsConfiguration("/oauth2/jwks", configuration);
-    source.registerCorsConfiguration("/oauth2/authorize", configuration);
-    source.registerCorsConfiguration("/oauth2/token", configuration);
-    source.registerCorsConfiguration("/oauth2/introspect", configuration);
-    source.registerCorsConfiguration("/oauth2/revoke", configuration);
-
-    return source;
-  }
-
   @Bean
   public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
     NimbusJwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource());
@@ -214,13 +181,6 @@ public class SecurityConfig {
     return new DelegatingOAuth2TokenGenerator(
         jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
   }
-
-//  @Bean
-//  public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
-//    return context -> {
-//    };
-//  }
-
 
   @Bean
   public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
