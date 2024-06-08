@@ -60,6 +60,7 @@ components:
               - username
               - password
               - scope
+              - otp
             properties:
               grant_type:
                 $ref: '#/components/schemas/GrantType'
@@ -70,7 +71,7 @@ components:
                 format: password
               scope:
                 type: string
-              otpCode:
+              otp:
                 type: string
   securitySchemes:
     basicAuth:

@@ -1,8 +1,8 @@
 package com.bitruby.usersapp.core.users;
 
-import com.bitruby.usersapp.outcomes.postgres.entity.UserEntity;
 import com.bitruby.usersapp.api.model.RoleType;
 import com.bitruby.usersapp.api.model.User;
+import com.bitruby.usersapp.outcomes.postgres.entity.UserEntity;
 import org.mapstruct.*;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,

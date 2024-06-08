@@ -1,11 +1,10 @@
 package com.bitruby.authserver.service;
 
-import com.bitruby.authserver.entity.OtpTokenEntity;
+import com.bitruby.authserver.entity.OtpTokenLoginEntity;
 import com.bitruby.authserver.repository.OtpTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,7 @@ public class OtpService {
   private final OtpTokenRepository otpTokenRepository;
 
   public boolean checkAndUseOtpCode(String key, String otpToCheck) {
-    OtpTokenEntity token =
+    OtpTokenLoginEntity token =
         otpTokenRepository.findById(key).orElseThrow(() -> new OAuth2AuthenticationException("Token not valid"));
     if(!Objects.equals(token.getToken(), otpToCheck) || !token.getExpirationTime().toInstant().isAfter(new Date().toInstant())) {
       return false;

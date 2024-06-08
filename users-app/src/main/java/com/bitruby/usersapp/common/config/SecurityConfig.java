@@ -31,12 +31,12 @@ public class SecurityConfig {
     http
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/api/v1/public/**").permitAll()
+            .requestMatchers("/error").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2
             .authenticationManagerResolver(new JwtIssuerAuthenticationManagerResolver("http://auth-server:9000/auth/api/v1")))
-        .cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsFilter()))
-
+        .cors(AbstractHttpConfigurer::disable)
         .csrf(AbstractHttpConfigurer::disable);
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer

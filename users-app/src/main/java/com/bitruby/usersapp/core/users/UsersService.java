@@ -2,15 +2,15 @@ package com.bitruby.usersapp.core.users;
 
 import com.bitruby.usersapp.api.model.GrantType;
 import com.bitruby.usersapp.api.model.OtpCodeCheck;
+import com.bitruby.usersapp.api.model.RegisterUser;
 import com.bitruby.usersapp.core.event.NewUserRegistrationEvent;
 import com.bitruby.usersapp.core.event.UserCompleteRegistrationEvent;
 import com.bitruby.usersapp.exceptions.BitrubyRuntimeExpection;
 import com.bitruby.usersapp.outcomes.postgres.entity.AuthorityRoleEnum;
+import com.bitruby.usersapp.outcomes.postgres.entity.OtpLoginTokenEntity;
 import com.bitruby.usersapp.outcomes.postgres.entity.UserEntity;
-import com.bitruby.usersapp.outcomes.postgres.entity.OtpTokenEntity;
-import com.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
 import com.bitruby.usersapp.outcomes.postgres.repository.OtpTokenRepository;
-import com.bitruby.usersapp.api.model.RegisterUser;
+import com.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +30,8 @@ public class UsersService {
 
   @Transactional
   public void registerUser(RegisterUser registerUser) {
+    userRepository.findByEmail(registerUser.getEmail()).ifPresent(user -> {throw new BitrubyRuntimeExpection("Email already registered");});
+    
     UserEntity userEntity = new UserEntity();
     userEntity.setEmail(registerUser.getEmail());
     userEntity.setPassword(passwordEncoder.encode(registerUser.getPassword()));
@@ -67,7 +69,7 @@ public class UsersService {
   }
 
   private void checkToken(OtpCodeCheck otpCodeCheck) {
-    OtpTokenEntity token =
+    OtpLoginTokenEntity token =
         otpTokenRepository.findById(otpCodeCheck.getSendTo()).orElseThrow(() -> new RuntimeException("Token not found"));
     if( Objects.equals(token.getToken(), otpCodeCheck.getOtp()) && !new Date().toInstant().isAfter(token.getExpirationTime().toInstant()) ) {
       otpTokenRepository.deleteById(otpCodeCheck.getSendTo());

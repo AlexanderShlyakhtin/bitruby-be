@@ -1,7 +1,7 @@
 package com.bitruby.usersapp.incomes.advices;
 
-import com.bitruby.usersapp.exceptions.ErrorCodeEnum;
 import com.bitruby.usersapp.api.model.Error;
+import com.bitruby.usersapp.exceptions.ErrorCodeEnum;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

@@ -39,14 +39,29 @@ paths:
           $ref: '#/components/responses/EmptyResponse'
         '500':
           $ref: '#/components/responses/Error'
-  /public/generate-otp:
+  /public/generate-otp/login:
     post:
       summary: Generate and send OTP code for login
       operationId: generateOtpCodeForLogin
       tags:
         - otp
       requestBody:
-        $ref: '#/components/requestBodies/GenerateOtpCodeRequest'
+        $ref: '#/components/requestBodies/GenerateOtpCodeLoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '500':
+          $ref: '#/components/responses/Error'
+  /public/generate-otp/registration:
+    post:
+      summary: Generate and send OTP code for Registration
+      operationId: generateOtpCodeForRegistration
+      tags:
+        - otp
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateOtpCodeRegistrationRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
@@ -67,9 +82,16 @@ components:
         response with no body
 
   requestBodies:
-    GenerateOtpCodeRequest:
+    GenerateOtpCodeLoginRequest:
       description: >-
         Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpCodeLogin'
+    GenerateOtpCodeRegistrationRequest:
+      description: >-
+        Generate OTP token for user registration
       content:
         application/json:
           schema:
@@ -184,6 +206,18 @@ components:
               $ref: '#/components/schemas/Otp'
         - $ref: '#/components/schemas/OtpCode'
 
+    OtpCodeLogin:
+      allOf:
+
+        - $ref: '#/components/schemas/OtpCode'
+        - type: object
+          required:
+            - password
+          properties:
+            password:
+              type: string
+              format: password
+
     OtpCode:
       type: object
       required:
@@ -194,3 +228,4 @@ components:
           $ref: '#/components/schemas/GrantType'
         sendTo:
           type: string
+          nullable: false

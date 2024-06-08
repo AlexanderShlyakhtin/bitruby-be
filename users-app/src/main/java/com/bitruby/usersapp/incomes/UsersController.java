@@ -1,15 +1,13 @@
 package com.bitruby.usersapp.incomes;
 
-import com.bitruby.usersapp.api.model.OtpCodeCheck;
-import com.bitruby.usersapp.core.users.UsersService;
 import com.bitruby.usersapp.api.UsersApiDelegate;
+import com.bitruby.usersapp.api.model.OtpCodeCheck;
 import com.bitruby.usersapp.api.model.RegisterUser;
+import com.bitruby.usersapp.core.users.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
