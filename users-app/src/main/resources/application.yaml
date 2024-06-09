@@ -3,6 +3,9 @@ server:
   address: 127.0.0.1
   servlet:
     context-path: /users
+  error:
+    include-message: always
+    include-binding-errors: always
 spring:
   application:
     name: users-app

@@ -35,15 +35,15 @@ public class OtpService {
     UserEntity userEntity;
     if(otpCode.getGrantType().equals(GrantType.EMAIL_PASSWORD)) {
       userEntity = userRepository.findByEmail(otpCode.getSendTo())
-          .orElseThrow(() -> new BitrubyRuntimeExpection("User not register"));
+          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
     } else if (otpCode.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
       userEntity = userRepository.findByPhone(otpCode.getSendTo())
-          .orElseThrow(() -> new BitrubyRuntimeExpection("User not register"));
+          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
     } else {
       throw new BitrubyRuntimeExpection("Unknown Grant Type");
     }
     if(!passwordEncoder.matches(otpCode.getPassword(), userEntity.getPassword())) {
-      throw new BitrubyRuntimeExpection("Invalid credentials");
+      throw new BitrubyRuntimeExpection("Неверная пара логин/пароль");
     }
     OtpLoginTokenEntity save =
         otpTokenRepository.save(new OtpLoginTokenEntity(otpCode.getSendTo(), generateRandomCode(), true));

@@ -20,14 +20,6 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    //  security:
-    //    oauth2:
-    //      resourceserver:
-    //        jwt:
-    //          issuer-uri:
-    //          jwk-set-uri: http://auth-server:9000/api/v1/auth/.well-known/openid-configuration
-
-
     http
         .authorizeHttpRequests(authorize -> authorize
             .requestMatchers("/api/v1/public/**").permitAll()
@@ -43,28 +35,5 @@ public class SecurityConfig {
             .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://127.0.0.1:4200")));
     return http.build();
   }
-
-  public CorsConfigurationSource corsFilter() {
-    CorsConfiguration configuration = new CorsConfiguration();
-
-    configuration.setAllowedOrigins(List.of("http://127.0.0.1:4200"));
-    configuration.setAllowedHeaders(List.of("*", "authorization"));
-    configuration.setAllowedMethods(
-        Arrays.asList("GET","POST", "OPTIONS", "HEAD", "DELETE", "PUT", "TRACE"));
-    configuration.setAllowCredentials(true);
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/.well-known/openid-configuration", configuration);
-    source.registerCorsConfiguration("/userinfo", configuration);
-    source.registerCorsConfiguration("/login", configuration);
-    source.registerCorsConfiguration("/oauth2/jwks", configuration);
-    source.registerCorsConfiguration("/oauth2/authorize", configuration);
-    source.registerCorsConfiguration("/oauth2/token", configuration);
-    source.registerCorsConfiguration("/oauth2/introspect", configuration);
-    source.registerCorsConfiguration("/oauth2/revoke", configuration);
-
-    return source;
-  }
-
 
 }
