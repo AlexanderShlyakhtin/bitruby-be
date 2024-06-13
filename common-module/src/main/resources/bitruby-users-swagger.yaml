@@ -8,23 +8,30 @@ servers:
     description: The URL prefix for API server
 tags:
   - name: users
+  - name: otp-registration
+  - name: otp-login
 
 paths:
   /public/registration:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Register new user
       operationId: registerUser
       tags:
         - users
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/RegisterNewUserRequest'
       responses:
         '201':
           $ref: '#/components/responses/EmptyResponse'
-        '500':
-          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
   /public/registration/complete-registration:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Complete registration of new user
       description: >-
@@ -37,49 +44,82 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
-        '500':
-          $ref: '#/components/responses/Error'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+
   /public/generate-otp/login:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Generate and send OTP code for login
       operationId: generateOtpCodeForLogin
       tags:
-        - otp
+        - otp-login
       requestBody:
         $ref: '#/components/requestBodies/GenerateOtpCodeLoginRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
         '400':
-          $ref: '#/components/responses/Error'
-        '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
   /public/generate-otp/registration:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Generate and send OTP code for Registration
       operationId: generateOtpCodeForRegistration
       tags:
-        - otp
+        - otp-registration
       requestBody:
         $ref: '#/components/requestBodies/GenerateOtpCodeRegistrationRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
         '400':
-          $ref: '#/components/responses/Error'
-        '500':
-          $ref: '#/components/responses/Error'
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
-    Error:
+    InternalServerError:
       description: error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    BadRequestError:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     EmptyResponse:
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
       description: >-
         response with no body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Base'
 
   requestBodies:
     GenerateOtpCodeLoginRequest:
@@ -109,8 +149,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/RegisterUser'
+            $ref: '#/components/schemas/NewUser'
   parameters:
+    RequestId:
+      name: x-request-id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
     Token:
       name: token
       in: path
@@ -118,32 +165,56 @@ components:
       schema:
         $ref: '#/components/schemas/Otp'
 
+
+
   schemas:
 
     Id:
       type: string
       format: uuid
+    Base:
+      type: object
+      required:
+        - success
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: >-
+            Влад сказал, что параметр обязательный для сервисов на ГО
+        timestamp:
+          type: string
+          format: date-time
+          description: >-
+            Время отправки ответа на запрос
+
     Otp:
       type: string
       maxLength: 6
       minLength: 6
     Error:
-      type: object
-      properties:
-        code:
-          type: string
-          description: code of error
-          example: "10"
-        message:
-          type: string
-          description: code of error
-          example: Text about reaosn of error
-        payload:
-          type: array
-          items:
-            type: string
-            description: description
-            example: example
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - code
+            - message
+            - payload
+          properties:
+            code:
+              type: string
+              description: code of error
+              example: "10"
+            message:
+              type: string
+              description: code of error
+              example: Text about reaosn of error
+            payload:
+              type: array
+              items:
+                type: string
+                description: description
+                example: example
     GrantType:
       type: string
       enum:
@@ -157,12 +228,14 @@ components:
         - DEVELOPER
         - ADMIN
 
-    RegisterUser:
+    NewUser:
       type: object
       required:
-        - email
+        - phone
         - password
       properties:
+        phone:
+          type: string
         email:
           type: string
           format: email
@@ -208,7 +281,6 @@ components:
 
     OtpCodeLogin:
       allOf:
-
         - $ref: '#/components/schemas/OtpCode'
         - type: object
           required:

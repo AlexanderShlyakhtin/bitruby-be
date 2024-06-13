@@ -6,16 +6,25 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+
 spring:
   application:
     name: users-app
+  liquibase:
+    change-log: db/db.changelog-tenant.yaml
+    liquibase-schema: users
   datasource:
     url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=users
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
   jpa:
+    properties:
+      hibernate:
+        default_schema: users
     show-sql: true
+    hibernate:
+      ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 logging:
   level:

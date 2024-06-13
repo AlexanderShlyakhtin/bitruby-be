@@ -4,13 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.bitRuby</groupId>
+        <groupId>kg.bitRuby</groupId>
         <artifactId>bitruby</artifactId>
         <version>0.0.1</version>
     </parent>
 
     <artifactId>common-module</artifactId>
     <version>0.0.1</version>
+
+    <name>.common-module</name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -69,6 +71,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -86,8 +96,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/bitruby-users-swagger.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.bitruby.usersapp.api</apiPackage>
-                            <modelPackage>com.bitruby.usersapp.api.model</modelPackage>
+                            <apiPackage>kg.bitruby.usersapp.api</apiPackage>
+                            <modelPackage>kg.bitruby.usersapp.api.model</modelPackage>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <configOptions>
                                 <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
@@ -129,8 +139,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/bitruby-auth-swagger.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.bitruby.authserver.api</apiPackage>
-                            <modelPackage>com.bitruby.authserver.api.model</modelPackage>
+                            <apiPackage>kg.bitruby.authserver.api</apiPackage>
+                            <modelPackage>kg.bitruby.authserver.api.model</modelPackage>
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                             <configOptions>
                                 <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>

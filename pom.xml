@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.bitRuby</groupId>
+    <groupId>kg.bitRuby</groupId>
     <artifactId>bitruby</artifactId>
     <version>0.0.1</version>
 
