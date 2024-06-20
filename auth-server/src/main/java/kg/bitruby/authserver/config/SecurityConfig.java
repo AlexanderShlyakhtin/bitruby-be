@@ -187,48 +187,70 @@ public class SecurityConfig {
   public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(UserInfoService userInfoService) {
     return context -> {
       if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
-        UserEntity userInfo;
-        if(context.getAuthorizationGrantType().getValue().equals("email_password")) {
-          EmailPasswordAuthenticationToken authorization = (EmailPasswordAuthenticationToken) context.getAuthorizationGrant();
-          userInfo = userInfoService.getUserInfoByEmail(authorization.getUsername());
-        } else if(context.getAuthorizationGrantType().getValue().equals("phone_password")) {
-          PhonePasswordAuthenticationToken authorization = (PhonePasswordAuthenticationToken) context.getAuthorizationGrant();
-          userInfo = userInfoService.getUserInfoByPhone(authorization.getUsername());
-        }
-        else if(context.getAuthorizationGrantType().getValue().equals(REFRESH_TOKEN.getValue())) {
-          OAuth2RefreshTokenAuthenticationToken authorization = (OAuth2RefreshTokenAuthenticationToken) context.getAuthorizationGrant();
-          OAuth2Authorization byToken = authorizationService().findByToken(authorization.getRefreshToken(), OAuth2TokenType.REFRESH_TOKEN);
-          assert byToken != null;
-          if(byToken.getAuthorizationGrantType().getValue().equals("phone_password")) {
-            OAuth2ClientAuthenticationToken token = (OAuth2ClientAuthenticationToken) byToken.getAttributes().get("java.security.Principal");
-            CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
-            userInfo = userInfoService.getUserInfoByPhone(details.username());
-          } else if(byToken.getAuthorizationGrantType().getValue().equals("email_password")) {
-            OAuth2ClientAuthenticationToken token = (OAuth2ClientAuthenticationToken) byToken.getAttributes().get("java.security.Principal");
-            CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
-            userInfo = userInfoService.getUserInfoByEmail(details.username());
-          } else {
-            throw new OAuth2AuthenticationException("Unsupported grant type");
-          }
-        }
-        else {
-          throw new OAuth2AuthenticationException("Unsupported grant type");
-        }
-        String level;
-        if(!userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete() && userInfo.isAccountNonLocked()) {
-          level = "0";
-        } else if(!userInfo.isAccountNonLocked()) {
-          level = "100";
-        } else if(userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete()) {
-          level = "1";
-        } else if(userInfo.isRegistrationComplete()) {
-          level = "2";
-        } else {
-          throw new OAuth2AuthenticationException("Illegal account status");
-        }
+        UserEntity userInfo = getUserInfo(context, userInfoService);
+        String level = determineUserLevel(userInfo);
         context.getClaims().claim("level", level);
       }
     };
+  }
+
+  private UserEntity getUserInfo(JwtEncodingContext context, UserInfoService userInfoService) {
+    String grantType = context.getAuthorizationGrantType().getValue();
+    UserEntity userInfo;
+
+    switch (grantType) {
+      case "email_password":
+        EmailPasswordAuthenticationToken emailAuth = (EmailPasswordAuthenticationToken) context.getAuthorizationGrant();
+        userInfo = userInfoService.getUserInfoByEmail(emailAuth.getUsername());
+        break;
+
+      case "phone_password":
+        PhonePasswordAuthenticationToken phoneAuth = (PhonePasswordAuthenticationToken) context.getAuthorizationGrant();
+        userInfo = userInfoService.getUserInfoByPhone(phoneAuth.getUsername());
+        break;
+
+      case "refresh_token":
+        OAuth2RefreshTokenAuthenticationToken refreshAuth = (OAuth2RefreshTokenAuthenticationToken) context.getAuthorizationGrant();
+        OAuth2Authorization authorization = authorizationService().findByToken(refreshAuth.getRefreshToken(), OAuth2TokenType.REFRESH_TOKEN);
+        if (authorization == null) {
+          throw new OAuth2AuthenticationException("Authorization not found");
+        }
+        userInfo = getUserInfoFromRefreshToken(authorization, userInfoService);
+        break;
+
+      default:
+        throw new OAuth2AuthenticationException("Unsupported grant type");
+    }
+    return userInfo;
+  }
+
+  private UserEntity getUserInfoFromRefreshToken(OAuth2Authorization authorization, UserInfoService userInfoService) {
+    OAuth2ClientAuthenticationToken token = (OAuth2ClientAuthenticationToken) authorization.getAttributes().get("java.security.Principal");
+    CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
+    String grantType = authorization.getAuthorizationGrantType().getValue();
+
+    switch (grantType) {
+      case "phone_password":
+        return userInfoService.getUserInfoByPhone(details.username());
+      case "email_password":
+        return userInfoService.getUserInfoByEmail(details.username());
+      default:
+        throw new OAuth2AuthenticationException("Unsupported grant type");
+    }
+  }
+
+  private String determineUserLevel(UserEntity userInfo) {
+    if (!userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete() && userInfo.isAccountNonLocked()) {
+      return "0";
+    } else if (!userInfo.isAccountNonLocked()) {
+      return "100";
+    } else if (userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete()) {
+      return "1";
+    } else if (userInfo.isRegistrationComplete()) {
+      return "2";
+    } else {
+      throw new OAuth2AuthenticationException("Illegal account status");
+    }
   }
 
   @Bean
