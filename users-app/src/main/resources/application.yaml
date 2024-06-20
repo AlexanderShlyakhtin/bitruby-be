@@ -26,10 +26,29 @@ spring:
     hibernate:
       ddl-auto: validate
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: localhost:29092
+    properties:
+      enable.idempotence: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: "bitruby-users-app"
 logging:
   level:
-    org.springframework.web: trace
-    org.springframework.security: trace
+
+    org:
+      springframework.web: trace
+      apache:
+        kafka: error
+        orm:
+          jpa:
+            JpaTransactionManager: trace
+        transaction: trace
+        listener:
+          KafkaMessageListenerContainer: error
+
 
 management:
   endpoints:
@@ -38,5 +57,18 @@ management:
         include: '*'
 
 bitruby:
-  users-app:
-    complete-registration-url: http://127.0.0.1:4200/complete-registration
+  kafka:
+    topics:
+      otp-login:
+        name: "otp-login"
+        numPartitions: 1
+        replicationFactor: 1
+      otp-registration:
+        name: "otp-registration"
+        numPartitions: 1
+        replicationFactor: 1
+      otp-restore-password:
+        name: "otp-restore-password"
+        numPartitions: 1
+        replicationFactor: 1
+

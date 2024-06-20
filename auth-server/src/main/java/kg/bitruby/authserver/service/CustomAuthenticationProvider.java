@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
   private final UserDetailsByEmailService customUserDetailsService;
-
   private final PasswordEncoder passwordEncoder;
 
   @Override
@@ -38,6 +38,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Bad Credentials");
     }
   }
+
 
   @Override
   public boolean supports(Class<?> authentication) {

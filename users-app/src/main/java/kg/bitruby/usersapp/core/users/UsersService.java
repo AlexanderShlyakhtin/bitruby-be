@@ -1,16 +1,12 @@
 package kg.bitruby.usersapp.core.users;
 
-import kg.bitruby.usersapp.api.model.GrantType;
-import kg.bitruby.usersapp.api.model.NewUser;
-import kg.bitruby.usersapp.api.model.OtpCodeCheck;
+import kg.bitruby.usersapp.api.model.*;
 import kg.bitruby.usersapp.core.event.NewUserRegistrationEvent;
 import kg.bitruby.usersapp.core.event.UserCompleteRegistrationEvent;
-import kg.bitruby.usersapp.exceptions.BitrubyRuntimeExpection;
+import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.outcomes.postgres.domain.AuthorityRoleEnum;
-import kg.bitruby.usersapp.outcomes.postgres.domain.OtpLoginTokenEntity;
 import kg.bitruby.usersapp.outcomes.postgres.domain.OtpRegistrationTokenEntity;
 import kg.bitruby.usersapp.outcomes.postgres.domain.UserEntity;
-import kg.bitruby.usersapp.outcomes.postgres.repository.OtpLoginTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Objects;
 
@@ -31,7 +28,7 @@ public class UsersService {
   private final OtpRegistrationTokenRepository otpTokenRepository;
 
   @Transactional
-  public void registerUser(NewUser registerUser) {
+  public Base registerUser(NewUser registerUser) {
     userRepository.findByEmail(registerUser.getEmail()).ifPresent(user -> {throw new BitrubyRuntimeExpection("Email already registered");});
     
     UserEntity userEntity = new UserEntity();
@@ -43,34 +40,48 @@ public class UsersService {
     userEntity.setAccountNonLocked(false);
     userEntity.setCredentialsNonExpired(false);
     userEntity.setRegistrationComplete(false);
+    userEntity.setUserDataNonPending(false);
     userRepository.save(userEntity);
     publisher.publishEvent(new NewUserRegistrationEvent(userEntity));
+
+    return new Base(true, OffsetDateTime.now());
+
   }
 
   @Transactional
-  public void completeRegistration(OtpCodeCheck otpCodeCheck) {
+  public Base completeRegistration(OtpCodeCheck otpCodeCheck) {
     checkToken(otpCodeCheck);
-    if(otpCodeCheck.getGrantType().equals(GrantType.EMAIL_PASSWORD)) {
-      UserEntity userEntity = userRepository.findByEmail(otpCodeCheck.getSendTo())
+    UserEntity userEntity = getUserEntityByGrantType(otpCodeCheck.getGrantType(), otpCodeCheck.getSendTo());
+    userEntity.setEnabled(true);
+    userEntity.setUserDataNonPending(false);
+    userEntity.setAccountNonLocked(true);
+    userEntity.setCredentialsNonExpired(true);
+    userEntity.setRegistrationComplete(false);
+    userRepository.save(userEntity);
+    publisher.publishEvent(new UserCompleteRegistrationEvent(userEntity));
+
+    return new Base(true, OffsetDateTime.now());
+  }
+
+
+  public Base restorePassword(RestorePassword restorePassword) {
+    checkToken(new OtpCodeCheck(restorePassword.getGrantType(), restorePassword.getSendTo(), restorePassword.getOtp()));
+    UserEntity userEntity = getUserEntityByGrantType(restorePassword.getGrantType(), restorePassword.getSendTo());
+    userEntity.setPassword(passwordEncoder.encode(restorePassword.getPassword()));
+    userRepository.save(userEntity);
+    return new Base(true, OffsetDateTime.now());
+  }
+
+  private UserEntity getUserEntityByGrantType(GrantType grantType, String sendTo) {
+    UserEntity userEntity;
+    if(grantType.equals(GrantType.EMAIL_PASSWORD)) {
+      userEntity = userRepository.findByEmail(sendTo)
           .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
-      userEntity.setEnabled(true);
-      userEntity.setUserDataNonPending(true);
-      userEntity.setAccountNonLocked(true);
-      userEntity.setCredentialsNonExpired(true);
-      userEntity.setRegistrationComplete(false);
-      userRepository.save(userEntity);
-      publisher.publishEvent(new UserCompleteRegistrationEvent(userEntity));
-    } else if(otpCodeCheck.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      UserEntity userEntity = userRepository.findByPhone(otpCodeCheck.getSendTo())
+    } else if(grantType.equals(GrantType.PHONE_PASSWORD)) {
+      userEntity = userRepository.findByPhone(sendTo)
           .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
-      userEntity.setEnabled(true);
-      userEntity.setUserDataNonPending(true);
-      userEntity.setAccountNonLocked(true);
-      userEntity.setCredentialsNonExpired(true);
-      userEntity.setRegistrationComplete(false);
-      userRepository.save(userEntity);
-      publisher.publishEvent(new UserCompleteRegistrationEvent(userEntity));
-    } else throw new BitrubyRuntimeExpection("Registration not complete");
+    } else throw new BitrubyRuntimeExpection("Unknown grant type");
+    return userEntity;
   }
 
   private void checkToken(OtpCodeCheck otpCodeCheck) {

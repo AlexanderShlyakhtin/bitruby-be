@@ -21,7 +21,8 @@ public class OtpService {
 
   public boolean checkAndUseOtpCode(String key, String otpToCheck) {
     OtpLoginTokenEntity token =
-        otpTokenRepository.findById(key).orElseThrow(() -> new OAuth2AuthenticationException("Token not valid"));
+        otpTokenRepository.findById(key).orElseThrow(() -> new OAuth2AuthenticationException(
+            "Token not valid"));
     if(!Objects.equals(token.getToken(), otpToCheck) || !token.getExpirationTime().toInstant().isAfter(new Date().toInstant())) {
       return false;
     } else {

@@ -1,13 +1,19 @@
 package kg.bitruby.authserver.config;
 
-import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationConverter;
-import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationProvider;
-import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePasswordAuthenticationConverter;
-import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePasswordAuthenticationProvider;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationConverter;
+import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationProvider;
+import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationToken;
+import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePasswordAuthenticationConverter;
+import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePasswordAuthenticationProvider;
+import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePasswordAuthenticationToken;
+import kg.bitruby.authserver.config.model.CustomPasswordUser;
+import kg.bitruby.authserver.entity.UserEntity;
+import kg.bitruby.authserver.service.UserInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -18,11 +24,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.*;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2RefreshTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -48,12 +57,16 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import static java.security.Security.getProviders;
 import static org.springframework.security.config.Customizer.withDefaults;
+import static org.springframework.security.oauth2.core.AuthorizationGrantType.REFRESH_TOKEN;
 
 
 @Configuration
 public class SecurityConfig {
+
+  @Autowired
+  private UserInfoService userInfoService;
+
 
   @Bean
   @Order(1)
@@ -123,7 +136,7 @@ public class SecurityConfig {
         .scope("offline_access")
         .redirectUri("http://127.0.0.1:4200")
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+        .authorizationGrantType(REFRESH_TOKEN)
         .authorizationGrantType(new AuthorizationGrantType("email_password"))
         .authorizationGrantType(new AuthorizationGrantType("phone_password"))
         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
@@ -163,11 +176,59 @@ public class SecurityConfig {
   public OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator() {
     NimbusJwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource());
     JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
-//    jwtGenerator.setJwtCustomizer(tokenCustomizer());
+    jwtGenerator.setJwtCustomizer(tokenCustomizer(userInfoService));
     OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
     OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
     return new DelegatingOAuth2TokenGenerator(
         jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
+  }
+
+  @Bean
+  public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer(UserInfoService userInfoService) {
+    return context -> {
+      if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+        UserEntity userInfo;
+        if(context.getAuthorizationGrantType().getValue().equals("email_password")) {
+          EmailPasswordAuthenticationToken authorization = (EmailPasswordAuthenticationToken) context.getAuthorizationGrant();
+          userInfo = userInfoService.getUserInfoByEmail(authorization.getUsername());
+        } else if(context.getAuthorizationGrantType().getValue().equals("phone_password")) {
+          PhonePasswordAuthenticationToken authorization = (PhonePasswordAuthenticationToken) context.getAuthorizationGrant();
+          userInfo = userInfoService.getUserInfoByPhone(authorization.getUsername());
+        }
+        else if(context.getAuthorizationGrantType().getValue().equals(REFRESH_TOKEN.getValue())) {
+          OAuth2RefreshTokenAuthenticationToken authorization = (OAuth2RefreshTokenAuthenticationToken) context.getAuthorizationGrant();
+          OAuth2Authorization byToken = authorizationService().findByToken(authorization.getRefreshToken(), OAuth2TokenType.REFRESH_TOKEN);
+          assert byToken != null;
+          if(byToken.getAuthorizationGrantType().getValue().equals("phone_password")) {
+            OAuth2ClientAuthenticationToken token = (OAuth2ClientAuthenticationToken) byToken.getAttributes().get("java.security.Principal");
+            CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
+            userInfo = userInfoService.getUserInfoByPhone(details.username());
+          } else if(byToken.getAuthorizationGrantType().getValue().equals("email_password")) {
+            OAuth2ClientAuthenticationToken token = (OAuth2ClientAuthenticationToken) byToken.getAttributes().get("java.security.Principal");
+            CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
+            userInfo = userInfoService.getUserInfoByEmail(details.username());
+          } else {
+            throw new OAuth2AuthenticationException("Unsupported grant type");
+          }
+        }
+        else {
+          throw new OAuth2AuthenticationException("Unsupported grant type");
+        }
+        String level;
+        if(!userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete() && userInfo.isAccountNonLocked()) {
+          level = "0";
+        } else if(!userInfo.isAccountNonLocked()) {
+          level = "100";
+        } else if(userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete()) {
+          level = "1";
+        } else if(userInfo.isRegistrationComplete()) {
+          level = "2";
+        } else {
+          throw new OAuth2AuthenticationException("Illegal account status");
+        }
+        context.getClaims().claim("level", level);
+      }
+    };
   }
 
   @Bean

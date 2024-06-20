@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: notifications-service
+  kafka:
+    bootstrap-servers: localhost:29092
+    properties:
+      enable.idempotence: true
+    consumer:
+      group-id: "bitruby-notifications-service"
+
+bitruby:
+  kafka:
+    topics:
+      otp-login:
+        name: "otp-login"
+        numPartitions: 1
+        replicationFactor: 1
+      otp-registration:
+        name: "otp-registration"
+        numPartitions: 1
+        replicationFactor: 1
+      otp-restore-password:
+        name: "otp-restore-password"
+        numPartitions: 1
+        replicationFactor: 1
+

@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.exceptions;
+package kg.bitruby.commonmodule.exceptions;
 
 import org.springframework.http.HttpStatus;
 

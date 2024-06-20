@@ -1,6 +1,6 @@
 package kg.bitruby.usersapp.common;
 
-import kg.bitruby.usersapp.exceptions.BitrubyRuntimeExpection;
+import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

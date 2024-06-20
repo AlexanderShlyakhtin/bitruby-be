@@ -9,6 +9,7 @@ servers:
 tags:
   - name: users
   - name: otp-registration
+  - name: otp-restore-password
   - name: otp-login
 
 paths:
@@ -49,6 +50,26 @@ paths:
         '5XX':
           $ref: '#/components/responses/InternalServerError'
 
+  /public/restore-password:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Restore forgotten password
+      description: >-
+        Restore forgotten password
+      requestBody:
+        $ref: '#/components/requestBodies/RestorePasswordRequest'
+      operationId: restorePassword
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+
   /public/generate-otp/login:
     parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -76,6 +97,23 @@ paths:
         - otp-registration
       requestBody:
         $ref: '#/components/requestBodies/GenerateOtpCodeRegistrationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+  /public/generate-otp/restore-password:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Generate and send OTP code for Restoring the password
+      operationId: generateOtpCodeForRestoringPassword
+      tags:
+        - otp-restore-password
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateOtpCodeRestorePasswordRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
@@ -136,6 +174,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OtpCode'
+    GenerateOtpCodeRestorePasswordRequest:
+      description: >-
+        Generate OTP token for restoring the password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpCode'
+    RestorePasswordRequest:
+      description: >-
+        Restore user password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestorePassword'
     CheckOtpCodeRequest:
       description: >-
         Generate OTP token for user login
@@ -289,7 +341,19 @@ components:
             password:
               type: string
               format: password
-
+    RestorePassword:
+      allOf:
+        - $ref: '#/components/schemas/OtpCode'
+        - type: object
+          required:
+            - otp
+            - password
+          properties:
+            otp:
+              $ref: '#/components/schemas/Otp'
+            password:
+              type: string
+              format: password
     OtpCode:
       type: object
       required:

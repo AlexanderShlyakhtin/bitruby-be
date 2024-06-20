@@ -4,6 +4,7 @@ import kg.bitruby.usersapp.api.UsersApiDelegate;
 import kg.bitruby.usersapp.api.model.Base;
 import kg.bitruby.usersapp.api.model.NewUser;
 import kg.bitruby.usersapp.api.model.OtpCodeCheck;
+import kg.bitruby.usersapp.api.model.RestorePassword;
 import kg.bitruby.usersapp.core.users.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,8 +32,7 @@ public class UsersController implements UsersApiDelegate {
    */
   @Override
   public ResponseEntity<Base> completeRegistration(UUID xRequestId, OtpCodeCheck otpCodeCheck) {
-    usersService.completeRegistration(otpCodeCheck);
-    return new ResponseEntity<>(HttpStatus.OK);
+    return new ResponseEntity<>(usersService.completeRegistration(otpCodeCheck), HttpStatus.OK);
   }
 
   /**
@@ -46,8 +46,20 @@ public class UsersController implements UsersApiDelegate {
    */
   @Override
   public ResponseEntity<Base> registerUser(UUID xRequestId, NewUser newUser) {
-    usersService.registerUser(newUser);
-    return new ResponseEntity<>(HttpStatus.CREATED);
+    return new ResponseEntity<>(usersService.registerUser(newUser), HttpStatus.CREATED);
   }
 
+  /**
+   * POST /public/restore-password : Restore forgotten password Restore forgotten password
+   *
+   * @param xRequestId (required)
+   * @param restorePassword Restore user password (optional)
+   * @return response with no body (status code 200) or error (status code 400) or error (status
+   * code 5XX)
+   * @see UsersApi#restorePassword
+   */
+  @Override
+  public ResponseEntity<Base> restorePassword(UUID xRequestId, RestorePassword restorePassword) {
+    return new ResponseEntity<>(usersService.restorePassword(restorePassword), HttpStatus.CREATED);
+  }
 }

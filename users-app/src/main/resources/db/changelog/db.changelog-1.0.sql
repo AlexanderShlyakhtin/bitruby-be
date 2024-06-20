@@ -39,6 +39,15 @@ CREATE TABLE IF NOT EXISTS otp_token_registration
     valid           boolean
 );
 
+--changeset shlyakhtin:alexander:5
+CREATE TABLE IF NOT EXISTS otp_token_restore_password
+(
+    id              varchar(255) primary key not null,
+    token           varchar(6),
+    expiration_time timestamp with time zone,
+    valid           boolean
+);
+
 
 
 

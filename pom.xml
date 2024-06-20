@@ -25,6 +25,7 @@
         <module>common-module</module>
         <module>auth-server</module>
         <module>users-app</module>
+        <module>notifications-service</module>
 
     </modules>
 

@@ -1,9 +1,9 @@
 package kg.bitruby.usersapp.incomes.advices;
 
 import kg.bitruby.usersapp.api.model.Error;
-import kg.bitruby.usersapp.exceptions.BitrubyNotFoundException;
-import kg.bitruby.usersapp.exceptions.BitrubyRuntimeExpection;
-import kg.bitruby.usersapp.exceptions.ErrorCodeEnum;
+import kg.bitruby.commonmodule.exceptions.BitrubyNotFoundException;
+import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
+import kg.bitruby.commonmodule.exceptions.ErrorCodeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

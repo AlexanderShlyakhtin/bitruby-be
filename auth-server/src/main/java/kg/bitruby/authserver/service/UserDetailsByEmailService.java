@@ -1,8 +1,8 @@
 package kg.bitruby.authserver.service;
 
+import jakarta.transaction.Transactional;
 import kg.bitruby.authserver.entity.UserEntity;
 import kg.bitruby.authserver.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,7 +17,6 @@ import java.util.Optional;
 public class UserDetailsByEmailService implements UserDetailsService {
 
   private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
 
   @Override
   public CustomUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
