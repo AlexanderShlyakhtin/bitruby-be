@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: Bitruby SMS Traffic API
+  description: API for sending SMS messages via SMS Traffic
+  version: 1.0.0
+servers:
+  - url: https://api.smstraffic.ru
+
+tags:
+  - name: sms
+paths:
+  /multi.php:
+    post:
+      summary: Send SMS Messages
+      description: Send SMS messages using SMS Traffic service.
+      tags:
+        - sms
+      requestBody:
+        $ref: '#/components/requestBodies/SendSmsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SendSmsResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+components:
+  responses:
+    Error:
+      description: Bad request
+      content:
+        text/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SendSmsResponse:
+      description: Successful response
+      content:
+        text/xml:
+          schema:
+            $ref: '#/components/schemas/SendSmsResult'
+  requestBodies:
+    SendSmsRequest:
+      required: true
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            $ref: '#/components/schemas/SendSms'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        reply:
+          type: object
+          properties:
+            result:
+              type: string
+              description: Result of the operation
+              example: ERROR
+            code:
+              type: integer
+              description: Error code
+              example: 401
+            description:
+              type: string
+              description: Description of the error
+              example: login param is missing
+    SendSmsResult:
+      type: object
+      properties:
+        reply:
+          type: object
+          properties:
+            result:
+              type: string
+              description: Result of the operation
+              example: OK
+            code:
+              type: integer
+              description: Response code
+              example: 0
+            description:
+              type: string
+              description: Description of the result
+              example: queued 1 messages
+            message_infos:
+              type: array
+              items:
+                type: object
+                properties:
+                  phone:
+                    type: string
+                    example: 79051112233
+                  sms_id:
+                    type: string
+                    example: 1000472891
+                  push_id:
+                    type: string
+                    example: push_id1
+    SendSms:
+      type: object
+      required:
+        - login
+        - password
+        - phones
+        - message
+      properties:
+        login:
+          type: string
+          description: Your login in the SMS Traffic system.
+          example: mylogin
+        password:
+          type: string
+          description: Password for your account.
+          example: mypassword
+        phones:
+          type: string
+          description: List of phone numbers in international format separated by commas.
+          example: 78001234567,79031234567
+        message:
+          type: string
+          description: |
+            Message text, up to 160 characters in Latin or 70 characters in Cyrillic.
+            The message will be split into parts if it exceeds these limits.
+          example: test message
+        rus:
+          type: integer
+          description: |
+            Encoding of the message. Defaults to 0.
+            - 0: Windows-1251, transliterating Russian characters to Latin.
+            - 1: Windows-1251, Russian characters.
+            - 5: UTF-8, Russian characters.
+          enum: [0, 1, 5]
+          default: 0
+        originator:
+          type: string
+          description: |
+            Message sender displayed on the recipient's phone. Can be alphanumeric (max 11 characters) or numeric (max 15 digits).
+          example: MyCompany
+        flash:
+          type: integer
+          description: |
+            Send the message as a flash SMS.
+            - 1: Flash SMS
+            - 0: Regular SMS
+          enum: [0, 1]
+          default: 0
+        start_date:
+          type: string
+          description: >-
+            Date and time to send the SMS (MSK timezone). Format: 'YYYY-MM-DD HH:MM:SS'.
+          example: '2023-05-09 09:00:00'
+        max_parts:
+          type: integer
+          description: Maximum number of parts the message can be split into.
+          example: 5
+          default: 255
+        gap:
+          type: number
+          description: Interval between sent messages in seconds.
+          example: 1.0
+          default: 1.0
+        group:
+          type: string
+          description: Name of the group to send the message to, replacing the phones parameter.
+          example: mygroup
+        timeout:
+          type: integer
+          description: Lifetime of the SMS in seconds. After this period, the message will no longer be delivered.
+          example: 3600
+        individual_messages:
+          type: integer
+          description: |
+            Send individual messages to each recipient.
+            - 1: Individual messages
+            - 0: Same message to all recipients
+          enum: [0, 1]
+          default: 0
+        delimiter:
+          type: string
+          description: Custom delimiter used with individual_messages to include newline characters in messages.
+          example: ABC
+        want_sms_ids:
+          type: integer
+          description: |
+            Request SMS IDs in the response.
+            - 1: Include SMS IDs
+            - 0: Do not include SMS IDs
+          enum: [0, 1]
+          default: 0
+        with_push_id:
+          type: integer
+          description: |
+            Used with want_sms_ids=1 and individual_messages=1 to pass unique IDs for each message.
+            - 1: Include push IDs
+            - 0: Do not include push IDs
+          enum: [0, 1]
+          default: 0
+        ignore_phone_format:
+          type: integer
+          description: |
+            Ignore phone number format validation.
+            - 1: Ignore format
+            - 0: Validate format
+          enum: [0, 1]
+          default: 0
+        two_byte_concat:
+          type: integer
+          description: |
+            Specify UDH concatenation method.
+            - 1: Use 2-byte reference number
+            - 0: Use 1-byte reference number
+          enum: [0, 1]
+          default: 0

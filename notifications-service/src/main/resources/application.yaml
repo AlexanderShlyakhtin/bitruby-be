@@ -9,6 +9,11 @@ spring:
       group-id: "bitruby-notifications-service"
 
 bitruby:
+  smsTraffic:
+    url: https://api.smstraffic.ru
+    login: bitrubi
+    password: CmBxYRTe
+    active: true
   sendSay:
     active: true
     url: https://api.sendsay.ru/general/api/v100/json/

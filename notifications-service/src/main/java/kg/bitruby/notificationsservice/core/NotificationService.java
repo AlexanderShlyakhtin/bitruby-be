@@ -23,7 +23,7 @@ public class NotificationService {
       emailServiceClient.sendEmail(otpEventEmailMapper.map(otpEventDto));
       log.info("Token for Registration {} send on email {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else if(otpEventDto.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      smsServiceClient.sendSms(otpEventDto);
+      smsServiceClient.sendSms(otpEventDto.getSendTo(), otpEventDto.getCode());
       log.info("Token for Registration {} send on sms {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else {
       throw new BitrubyRuntimeExpection("Unknown OTP grant type");
@@ -35,7 +35,7 @@ public class NotificationService {
       emailServiceClient.sendEmail(otpEventEmailMapper.map(otpEventDto));
       log.info("Token for Login {} send on email {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else if(otpEventDto.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      smsServiceClient.sendSms(otpEventDto);
+      smsServiceClient.sendSms(otpEventDto.getSendTo(), otpEventDto.getCode());
       log.info("Token for Login {} send on sms {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else {
       throw new BitrubyRuntimeExpection("Unknown OTP grant type");
@@ -47,7 +47,7 @@ public class NotificationService {
       emailServiceClient.sendEmail(otpEventEmailMapper.map(otpEventDto));
       log.info("Token for Restoring Password {} send on email {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else if(otpEventDto.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      smsServiceClient.sendSms(otpEventDto);
+      smsServiceClient.sendSms(otpEventDto.getSendTo(), otpEventDto.getCode());
       log.info("Token for Restoring Password {} send on sms {}", otpEventDto.getCode(), otpEventDto.getSendTo());
     } else {
       throw new BitrubyRuntimeExpection("Unknown OTP grant type");
