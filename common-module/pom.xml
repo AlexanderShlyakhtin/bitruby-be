@@ -106,31 +106,6 @@
                             </configOptions>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources/openapi/src/main/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>${version-openapi-generator}</version>
-                <executions>
                     <execution>
                         <id>generate-auth-api</id>
                         <goals>
@@ -147,6 +122,84 @@
                                 <useTags>true</useTags>
                                 <delegatePattern>true</delegatePattern>
                             </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-verification-webhooks-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-verification-webhooks-swagger.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>kg.bitruby.usersapp.api</apiPackage>
+                            <modelPackage>kg.bitruby.usersapp.api.model</modelPackage>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <configOptions>
+                                <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
+                                <useTags>true</useTags>
+                                <delegatePattern>true</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-veriff-api-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-verification-client-swagger.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>kg.bitruby.usersapp.client.veriff.api</apiPackage>
+                            <modelPackage>kg.bitruby.usersapp.client.veriff.api.model</modelPackage>
+                            <invokerPackage>kg.bitruby.usersapp.client.veriff.api.invoker</invokerPackage>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <library>resttemplate</library>
+                            <configOptions>
+                                <useTags>true</useTags>
+                                <openApiNullable>true</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-email-api-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-email-client-swagger.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>kg.bitruby.usersapp.client.sendsay.api</apiPackage>
+                            <modelPackage>kg.bitruby.usersapp.client.sendsay.api.model</modelPackage>
+                            <invokerPackage>kg.bitruby.usersapp.client.sendsay.api.invoker</invokerPackage>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <library>resttemplate</library>
+                            <configOptions>
+                                <useTags>true</useTags>
+                                <openApiNullable>true</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/target/generated-sources/openapi/src/main/java</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>

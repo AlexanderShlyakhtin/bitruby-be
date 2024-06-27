@@ -16,26 +16,47 @@ public class KafkaTopicsConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
-  @Value("${bitruby.kafka.topics.otp-login.name}")
+  @Value("${bitruby.kafka.topics.otp.login.name}")
   private String otpLoginTopic;
-  @Value("${bitruby.kafka.topics.otp-login.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.login.numPartitions}")
   private int otpLoginTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-login.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.login.replicationFactor}")
   private short otpLoginTopicReplicationFactor;
 
-  @Value("${bitruby.kafka.topics.otp-registration.name}")
+  @Value("${bitruby.kafka.topics.otp.registration.name}")
   private String otpRegistrationTopic;
-  @Value("${bitruby.kafka.topics.otp-registration.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.registration.numPartitions}")
   private int otpRegistrationTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-registration.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.registration.replicationFactor}")
   private short otpRegistrationTopicReplicationFactor;
 
-  @Value("${bitruby.kafka.topics.otp-restore-password.name}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.name}")
   private String otpRestorePasswordTopic;
-  @Value("${bitruby.kafka.topics.otp-restore-password.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.numPartitions}")
   private int otpRestorePasswordTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-restore-password.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.replicationFactor}")
   private short otpRestorePasswordTopicReplicationFactor;
+
+  @Value("${bitruby.kafka.topics.verification.events.name}")
+  private String verificationEventsTopic;
+  @Value("${bitruby.kafka.topics.verification.events.numPartitions}")
+  private int verificationEventsTopicNumPartitions;
+  @Value("${bitruby.kafka.topics.verification.events.replicationFactor}")
+  private short verificationEventsTopicReplicationFactor;
+
+  @Value("${bitruby.kafka.topics.verification.decisions.name}")
+  private String verificationDecisionsTopic;
+  @Value("${bitruby.kafka.topics.verification.decisions.numPartitions}")
+  private int verificationDecisionsTopicNumPartitions;
+  @Value("${bitruby.kafka.topics.verification.decisions.replicationFactor}")
+  private short verificationDecisionsTopicReplicationFactor;
+
+  @Value("${bitruby.kafka.topics.notifications.user-verification-status.name}")
+  private String notificationsUserVerificationStatusDecisionsTopic;
+  @Value("${bitruby.kafka.topics.notifications.user-verification-status.numPartitions}")
+  private int notificationsUserVerificationStatusTopicNumPartitions;
+  @Value("${bitruby.kafka.topics.notifications.user-verification-status.replicationFactor}")
+  private short notificationsUserVerificationStatusTopicReplicationFactor;
 
 
   // Configure KafkaAdmin bean
@@ -68,5 +89,23 @@ public class KafkaTopicsConfig {
   public NewTopic otpRestorePasswordTopic() {
     return new NewTopic(otpRestorePasswordTopic, otpRestorePasswordTopicNumPartitions,
         otpRestorePasswordTopicReplicationFactor);
+  }
+
+  @Bean
+  public NewTopic verificationEventsTopic() {
+    return new NewTopic(verificationEventsTopic, verificationEventsTopicNumPartitions,
+        verificationEventsTopicReplicationFactor);
+  }
+
+  @Bean
+  public NewTopic verificationDecisionsTopic() {
+    return new NewTopic(verificationDecisionsTopic, verificationDecisionsTopicNumPartitions,
+        verificationDecisionsTopicReplicationFactor);
+  }
+
+  @Bean
+  public NewTopic notificationsUserVerificationStatusTopic() {
+    return new NewTopic(notificationsUserVerificationStatusDecisionsTopic, notificationsUserVerificationStatusTopicNumPartitions,
+        notificationsUserVerificationStatusTopicReplicationFactor);
   }
 }

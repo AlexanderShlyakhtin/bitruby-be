@@ -1,0 +1,285 @@
+openapi: 3.0.3
+info:
+  title: BitRuby-Veriff integation API client service
+  description: Swagger client for Veriff
+  version: 1.0.0
+servers:
+  - url: /v1
+    description: The URL prefix for API server
+tags:
+  - name: verification
+paths:
+  /sessions:
+    post:
+      summary: Verification event hooks
+      operationId: verificationEvent
+      parameters:
+        - $ref: '#/components/parameters/XAuthClient'
+      tags:
+        - verification
+      requestBody:
+        $ref: '#/components/requestBodies/CreateSessionRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreateSessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  responses:
+    InternalServerError:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequestError:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    CreateSessionResponse:
+      headers:
+        X-AUTH-CLIENT:
+          required: true
+          description: >-
+            X-AUTH-CLIENT
+          schema:
+            type: string
+        X-HMAC-SIGNATURE:
+          required: true
+          description: >-
+            X-AUTH-CLIENT
+          schema:
+            type: string
+      description: >-
+        response with success creation of session
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Session'
+    EmptyResponse:
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      description: >-
+        response with no body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Base'
+
+  requestBodies:
+    CreateSessionRequest:
+      description: >-
+        Verification Event Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewSession'
+  parameters:
+    RequestId:
+      name: x-request-id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XAuthClient:
+      name: X-AUTH-CLIENT
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XSignature:
+      name: X-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+    XHmacSignature:
+      name: X-Hmac-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+  schemas:
+    Base:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          description: >-
+            Влад сказал, что параметр обязательный для сервисов на ГО
+    Error:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - code
+            - message
+            - payload
+          properties:
+            code:
+              type: string
+              description: code of error
+              example: "10"
+            message:
+              type: string
+              description: code of error
+              example: Text about reaosn of error
+            payload:
+              type: array
+              items:
+                type: string
+                description: description
+                example: example
+    Document:
+      type: object
+      properties:
+        number:
+          type: string
+          description: Document number, [a-zA-Z0-9] characters only
+        country:
+          type: string
+          description: Issuing country of the document (ISO-2)
+        type:
+          type: string
+          enum:
+            - PASSPORT
+            - ID_CARD
+            - RESIDENCE_PERMIT
+            - DRIVERS_LICENSE
+            - VISA
+          description: Document type
+    Person:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - idNumber
+      properties:
+        firstName:
+          type: string
+          description: First name
+        lastName:
+          type: string
+          description: Last name
+        idNumber:
+          type: string
+          format: uuid
+          description: National identification number
+        # gender:
+        #   type: string
+        #   enum:
+        #     - M
+        #     - F
+        #   description: Gender
+        # dateOfBirth:
+        #   type: string
+        #   format: date
+        #   description: Date of birth (YYYY-MM-DD)
+    Session:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Request status
+        verification:
+          type: object
+          description: Verification object
+          required:
+            - id
+            - url
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: UUID v4 which identifies the verification session
+            url:
+              type: string
+              description: >
+                URL of the verification to which the person is redirected (Combination of the baseUrl and sessionToken)
+            vendorData:
+              type: string
+              maxLength: 1000
+              description: Customer-specific data string, max 1000 characters long
+            host:
+              type: string
+              description: The base url the sessionToken can be used for
+            sessionStatus:
+              type: string
+              description: Verification session status
+            sessionToken:
+              type: string
+              description: Session-specific token of the verification
+
+    NewSession:
+      type: object
+      required:
+        - verification
+      properties:
+        verification:
+          type: object
+          required:
+            - callback
+            - person
+            - address
+          properties:
+            callback:
+              type: string
+              description: >
+                The callbackUrl to where the end-user is redirected after the verification session is completed.
+                Default is visible in the Veriff environment > Settings. Changing the value in this request body will
+                overwrite the default callbackUrl, but it will not change the callbackUrl that is visible in the Veriff environment.
+            person:
+              $ref: '#/components/schemas/Person'
+            # document:
+            #   $ref: '#/components/schemas/Document'
+            address:
+              type: object
+              required:
+                - fullAddress
+              properties:
+                fullAddress:
+                  type: string
+                  description: Full address (mandatory only for UK DIATF Medium profile flow)
+            # vendorData:
+            #   type: string
+            #   maxLength: 1000
+            #   description: >
+            #     Customer-specific data string, will be sent back unmodified using webhooks. We require only non-semantic data
+            #     to be submitted (UUID-s etc., that cannot be resolved or used outside the customer's domain). This is a
+            #     recommended field to improve fraud mitigation.
+            # consents:
+            #   type: array
+            #   items:
+            #     type: object
+            #     properties:
+            #       type:
+            #         type: string
+            #         description: Indicates the feature for which the consent is given
+            #       approved:
+            #         type: boolean
+            #         description: >
+            #           If true, indicates that the consent has been given. true is mandatory to start the INE Biometric Database
+            #           Verification. If false or missing, the session is not created.

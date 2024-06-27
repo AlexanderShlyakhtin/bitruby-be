@@ -1,10 +1,8 @@
-package kg.bitruby.usersapp.incomes.controllers.users;
+package kg.bitruby.usersapp.incomes.rest.controllers.users;
 
 import kg.bitruby.usersapp.api.UsersApiDelegate;
-import kg.bitruby.usersapp.api.model.Base;
-import kg.bitruby.usersapp.api.model.NewUser;
-import kg.bitruby.usersapp.api.model.OtpCodeCheck;
-import kg.bitruby.usersapp.api.model.RestorePassword;
+import kg.bitruby.usersapp.api.model.*;
+import kg.bitruby.usersapp.core.restorepassword.RestorePasswordService;
 import kg.bitruby.usersapp.core.users.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +16,7 @@ import java.util.UUID;
 public class UsersController implements UsersApiDelegate {
 
   private final UsersService usersService;
-
+  private final RestorePasswordService restorePasswordService;
 
   /**
    * POST /public/registration/complete-registration : Complete registration of new user Complete
@@ -60,6 +58,34 @@ public class UsersController implements UsersApiDelegate {
    */
   @Override
   public ResponseEntity<Base> restorePassword(UUID xRequestId, RestorePassword restorePassword) {
-    return new ResponseEntity<>(usersService.restorePassword(restorePassword), HttpStatus.CREATED);
+    return new ResponseEntity<>(restorePasswordService.restorePassword(restorePassword), HttpStatus.CREATED);
+  }
+
+  /**
+   * POST /secured/form/{user-id} : Apply user form Apply user form
+   *
+   * @param xRequestId (required)
+   * @param userId (required)
+   * @param userForm Generate OTP token for user login (optional)
+   * @return response with no body (status code 200) or error (status code 400) or error (status
+   * code 5XX)
+   * @see UsersApi#applyUserForm
+   */
+  @Override
+  public ResponseEntity<Base> applyUserForm(UUID xRequestId, UserForm userForm) {
+    return new ResponseEntity<>(usersService.applyUserForm(userForm), HttpStatus.OK);
+  }
+
+  /**
+   * GET /secured/verification/{user-id} : Get user verification data Get user verification data
+   *
+   * @param xRequestId (required)
+   * @param userId (required)
+   * @return error (status code 200) or error (status code 400) or error (status code 5XX)
+   * @see UsersApi#getUserVerificationData
+   */
+  @Override
+  public ResponseEntity<UserVerification> getUserVerificationData(UUID xRequestId) {
+    return new ResponseEntity<>(usersService.getUserVerificationData(), HttpStatus.OK);
   }
 }

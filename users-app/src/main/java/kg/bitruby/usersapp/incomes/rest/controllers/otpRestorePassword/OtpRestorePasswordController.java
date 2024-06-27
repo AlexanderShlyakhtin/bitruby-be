@@ -1,8 +1,9 @@
-package kg.bitruby.usersapp.incomes.controllers.otpRestorePassword;
+package kg.bitruby.usersapp.incomes.rest.controllers.otpRestorePassword;
 
 import kg.bitruby.usersapp.api.OtpRestorePasswordApiDelegate;
 import kg.bitruby.usersapp.api.model.Base;
 import kg.bitruby.usersapp.api.model.OtpCode;
+import kg.bitruby.usersapp.api.model.OtpCodeRestorePassword;
 import kg.bitruby.usersapp.core.otp.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,21 @@ public class OtpRestorePasswordController implements OtpRestorePasswordApiDelega
   public ResponseEntity<Base> generateOtpCodeForRestoringPassword(UUID xRequestId,
       OtpCode otpCode) {
     return new ResponseEntity<>(otpService.generateOtpCodeForRestoringPassword(otpCode), HttpStatus.OK);
+  }
+
+  /**
+   * POST /public/generate-otp/restore-password/check : Check generatred OTP code to Restore user
+   * the password
+   *
+   * @param xRequestId (required)
+   * @param otpCodeRestorePassword Check OTP token for restoring the password (optional)
+   * @return response with no body (status code 200) or error (status code 400) or error (status
+   * code 5XX)
+   * @see OtpRestorePasswordApi#checkOtpCodeForRestoringPassword
+   */
+  @Override
+  public ResponseEntity<Base> checkOtpCodeForRestoringPassword(UUID xRequestId,
+      OtpCodeRestorePassword otpCodeRestorePassword) {
+    return new ResponseEntity<>(otpService.checkOtpCodeForRestoringPassword(otpCodeRestorePassword), HttpStatus.OK);
   }
 }

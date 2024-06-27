@@ -6,6 +6,11 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: password
+    key-store-type: PKCS12
+    key-alias: bitruby
 
 spring:
   application:
@@ -37,11 +42,12 @@ spring:
       group-id: "bitruby-users-app"
 logging:
   level:
-
     org:
+      springframework.security: trace
       springframework.web: trace
       apache:
         kafka: error
+        http: DEBUG
         orm:
           jpa:
             JpaTransactionManager: trace
@@ -57,18 +63,40 @@ management:
         include: '*'
 
 bitruby:
+  verification:
+    secret-key: c3198047-7f8a-4f90-a6fe-1e4b22bc487b
+    api-key: afee4a07-dd80-49d0-ba25-71580654fe9a
+    callback-url: 'https://webhook.cool/at/quaint-shampoo-70'
+    url: 'https://stationapi.veriff.com/v1'
   kafka:
     topics:
-      otp-login:
-        name: "otp-login"
-        numPartitions: 1
-        replicationFactor: 1
-      otp-registration:
-        name: "otp-registration"
-        numPartitions: 1
-        replicationFactor: 1
-      otp-restore-password:
-        name: "otp-restore-password"
-        numPartitions: 1
-        replicationFactor: 1
+      otp:
+        login:
+          name: "otp-login"
+          numPartitions: 1
+          replicationFactor: 1
+        registration:
+          name: "otp-registration"
+          numPartitions: 1
+          replicationFactor: 1
+        restore-password:
+          name: "otp-restore-password"
+          numPartitions: 1
+          replicationFactor: 1
+      verification:
+        events:
+          name: "verification-events"
+          numPartitions: 1
+          replicationFactor: 1
+        decisions:
+          name: "verification-decisions"
+          numPartitions: 1
+          replicationFactor: 1
+      notifications:
+        user-verification-status:
+          name: "user-verification-status"
+          numPartitions: 1
+          replicationFactor: 1
+
+
 

@@ -8,9 +8,25 @@ servers:
     description: The URL prefix for API server
 tags:
   - name: auth
-  - name: otp
 
 paths:
+  /oauth2/introspect:
+    post:
+      summary: Introspect token access token
+      operationId: introspectAccessToken
+      tags:
+        - auth
+      security:
+        - basicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/IntrospectTokenRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/IntrospectTokenResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+        '5XX':
+          $ref: '#/components/responses/Error'
   /oauth2/token:
     post:
       summary: Get access and refresh token by user password
@@ -21,14 +37,30 @@ paths:
         - basicAuth: []
       requestBody:
         $ref: '#/components/requestBodies/TokenRequest'
+      parameters:
+        - $ref: '#/components/parameters/GrantType'
+        - $ref: '#/components/parameters/RefreshToken'
       responses:
         '200':
           $ref: '#/components/responses/TokenResponse'
-        '400':
+        '4XX':
           $ref: '#/components/responses/Error'
-        '500':
+        '5XX':
           $ref: '#/components/responses/Error'
 components:
+  parameters:
+    GrantType:
+      name: grant_type
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/GrantType'
+    RefreshToken:
+      name: refresh_token
+      in: query
+      required: false
+      schema:
+        type: string
   responses:
 
     Error:
@@ -47,8 +79,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Token'
+    IntrospectTokenResponse:
+      description: >-
+        Token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/IntrospectToken'
   requestBodies:
-    TokenRequest:
+    IntrospectTokenRequest:
       description: >-
         Get token by grant type and password
       content:
@@ -56,23 +95,48 @@ components:
           schema:
             type: object
             required:
-              - grant_type
-              - username
-              - password
-              - scope
-              - otp
+              - token
             properties:
-              grant_type:
-                $ref: '#/components/schemas/GrantType'
-              username:
+              token:
                 type: string
-              password:
-                type: string
-                format: password
-              scope:
-                type: string
-              otp:
-                type: string
+
+    TokenRequest:
+      description: >-
+        Get token by grant type and password
+      content:
+        multipart/form-data:
+          schema:
+            oneOf:
+              - type: object
+                required:
+                  - grant_type
+                  - refresh_token
+                properties:
+                  grant_type:
+                    $ref: '#/components/schemas/GrantType'
+                  refresh_token:
+                    type: string
+              - type: object
+                required:
+                  - grant_type
+                  - username
+                  - password
+                  - scope
+                  - otp
+                properties:
+                  grant_type:
+                    $ref: '#/components/schemas/GrantType'
+                  username:
+                    type: string
+                  password:
+                    type: string
+                    format: password
+                  scope:
+                    type: string
+                  otp:
+                    type: string
+
+
   securitySchemes:
     basicAuth:
       type: http
@@ -102,6 +166,7 @@ components:
       enum:
         - email_password
         - phone_password
+        - refresh_token
       default: phone_password
     Token:
       type: object
@@ -120,3 +185,11 @@ components:
           type: string
         expires_in:
           type: integer
+    IntrospectToken:
+      type: object
+      required:
+        - active
+      additionalProperties: true
+      properties:
+        active:
+          type: boolean

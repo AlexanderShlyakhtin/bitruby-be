@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: Sendsay Email Sending API
+  description: API for sending test emails using Sendsay.
+  version: 1.0.0
+servers:
+  - url: https://api.sendsay.ru/general/api/v100/json
+    description: Sendsay API server
+tags:
+  - name: email
+paths:
+  /{login}/sendEmail:
+    post:
+      summary: Send a test email
+      operationId: sendTestEmail
+      tags:
+        - email
+      parameters:
+        - $ref: '#/components/parameters/Login'
+        - $ref: '#/components/parameters/XRequestId'
+      requestBody:
+        $ref: '#/components/requestBodies/SendEmailRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SendEmailResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+        '5XX':
+          $ref: '#/components/responses/Error'
+components:
+  requestBodies:
+    SendEmailRequest:
+      description: Request body for sending a test email
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SendEmail'
+  responses:
+    Error:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SendEmailResponse:
+      description: Email sent successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SemdEmailResult'
+
+  parameters:
+    XRequestId:
+      name: X-Request-ID
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Login:
+      name: login
+      in: path
+      required: true
+      description: Your Sendsay login
+      schema:
+        type: string
+  schemas:
+    Error:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: >-
+                  Код ошибки
+              explain:
+                type: string
+                description: >-
+                  возможное более развёрнутое описание
+    Letter:
+      type: object
+      required:
+        - message
+        - subject
+        - from.email
+      properties:
+        message:
+          type: object
+          required:
+            - html
+          properties:
+            html:
+              type: string
+              description: HTML version of the email
+              example: html-версия письма
+        subject:
+          type: string
+          description: Subject of the email
+          example: Тема письма
+        from.email:
+          type: string
+          description: Email address of the sender
+          example: EMAIL-АДРЕС ОТПРАВИТЕЛЯ
+    SendEmail:
+      type: object
+      required:
+        - action
+        - letter
+        - group
+        - email
+        - sendwhen
+        - apikey
+      properties:
+        action:
+          type: string
+          example: issue.send
+          description: The action to be performed
+        letter:
+          $ref: '#/components/schemas/Letter'
+        group:
+          type: string
+          description: Group to which the email belongs
+          example: personal
+        email:
+          type: string
+          description: Email address of the recipient
+          example: EMAIL-АДРЕС ПОЛУЧАТЕЛЯ
+        sendwhen:
+          type: string
+          enum:
+            - now
+            - later
+            - delay
+            - save
+            - test
+          example: now
+        apikey:
+          type: string
+          description: Your API key
+          example: ВАШ API КЛЮЧ
+    SemdEmailResult:
+      type: object
+      properties:
+        track.id:
+          type: string
+        request.id:
+          type: string
+        duration:
+          type: number
+        channel:
+          type: string
+        _ehid:
+          type: string
+

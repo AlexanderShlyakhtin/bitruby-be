@@ -23,12 +23,14 @@ public class UserEntity implements Serializable {
   private String phone;
   @Column(name = "password", nullable = false)
   private String password;
-  @Column(name = "email", unique = true)
+  @Column(name = "email", nullable = false, unique = true)
   private String email;
   @Column(name = "first_name")
   private String firstName;
   @Column(name = "last_name")
   private String lastName;
+  @Column(name = "address")
+  private String address;
   @Column(name = "is_enabled", nullable = false)
   private boolean isEnabled = false;
   @Column(name = "is_account_non_locked", nullable = false)
@@ -37,10 +39,11 @@ public class UserEntity implements Serializable {
   private boolean isCredentialsNonExpired = true;
   @Column(name = "is_registration_complete", nullable = false)
   private boolean isRegistrationComplete = false;
-  @Column(name = "is_user_data_non_pending", nullable = false)
-  private boolean isUserDataNonPending = false;
+  @Column(name = "is_verified", nullable = false)
+  private boolean isVerified = false;
+  @Column(name = "is_bybit_account_created", nullable = false)
+  private boolean isBybitAccountCreated = false;
   @Column(name = "role")
   @Enumerated(EnumType.STRING)
   private AuthorityRoleEnum role;
-
 }

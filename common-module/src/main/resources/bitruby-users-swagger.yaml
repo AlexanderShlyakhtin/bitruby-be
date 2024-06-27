@@ -69,7 +69,42 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-
+  /secured/verification/form:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Apply user form
+      description: >-
+        Apply user form
+      requestBody:
+        $ref: '#/components/requestBodies/UserFormRequest'
+      operationId: applyUserForm
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+  /secured/verification:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    get:
+      summary: Get user verification data
+      description: >-
+        Get user verification data
+      operationId: getUserVerificationData
+      tags:
+        - users
+      responses:
+        '200':
+          $ref: '#/components/responses/UserVerificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
   /public/generate-otp/login:
     parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -121,8 +156,39 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
+  /public/generate-otp/restore-password/check:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Check generatred OTP code to Restore user the password
+      operationId: checkOtpCodeForRestoringPassword
+      tags:
+        - otp-restore-password
+      requestBody:
+        $ref: '#/components/requestBodies/CheckOtpCodeRestorePasswordRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
+    UserVerificationResponse:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserVerification'
     InternalServerError:
       description: error
       content:
@@ -160,6 +226,13 @@ components:
             $ref: '#/components/schemas/Base'
 
   requestBodies:
+    UserFormRequest:
+      description: >-
+        Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserForm'
     GenerateOtpCodeLoginRequest:
       description: >-
         Generate OTP token for user login
@@ -181,6 +254,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/OtpCode'
+    CheckOtpCodeRestorePasswordRequest:
+      description: >-
+        Check OTP token for restoring the password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpCodeRestorePassword'
     RestorePasswordRequest:
       description: >-
         Restore user password
@@ -206,6 +286,13 @@ components:
     RequestId:
       name: x-request-id
       in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: user-id
+      in: path
       required: true
       schema:
         type: string
@@ -294,6 +381,62 @@ components:
         password:
           type: string
           format: password
+        description:
+          type: string
+
+    VerificationStatus:
+      type: string
+      enum:
+        - waiting_for_start
+        - started
+        - waiting_for_review
+        - waiting_for_resubmission
+        - flow_finished_success
+        - flow_finished_rejected
+        - flow_finished_error
+      description: >
+        Enum representing various verification statuses:
+        - WAITING_FOR_START: waiting_for_start
+        - STARTED: started
+        - WAITING_FOR_REVIEW: waiting_for_review
+        - WAITING_FOR_RESUBMISSION: waiting_for_resubmission
+        - SUCCESS: flow_finished_success
+        - REJECTED: flow_finished_rejected
+        - ERROR: flow_finished_error
+    UserVerification:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - user
+            - verificationSession
+          properties:
+            user:
+              $ref: '#/components/schemas/UserForm'
+            verificationSession:
+              type: object
+              nullable: true
+              required:
+                - url
+                - status
+              properties:
+                url:
+                  type: string
+                status:
+                  $ref: '#/components/schemas/VerificationStatus'
+    UserForm:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - address
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        address:
+          type: string
     User:
       type: object
       properties:
@@ -354,6 +497,16 @@ components:
             password:
               type: string
               format: password
+
+    OtpCodeRestorePassword:
+      allOf:
+        - $ref: '#/components/schemas/OtpCode'
+        - type: object
+          required:
+            - otp
+          properties:
+            otp:
+              $ref: '#/components/schemas/Otp'
     OtpCode:
       type: object
       required:

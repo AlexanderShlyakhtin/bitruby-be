@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.incomes.controllers.otpRegistration;
+package kg.bitruby.usersapp.incomes.rest.controllers.otpRegistration;
 
 import kg.bitruby.usersapp.api.OtpRegistrationApiDelegate;
 import kg.bitruby.usersapp.api.model.Base;

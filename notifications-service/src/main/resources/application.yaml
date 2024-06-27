@@ -11,16 +11,22 @@ spring:
 bitruby:
   kafka:
     topics:
-      otp-login:
-        name: "otp-login"
-        numPartitions: 1
-        replicationFactor: 1
-      otp-registration:
-        name: "otp-registration"
-        numPartitions: 1
-        replicationFactor: 1
-      otp-restore-password:
-        name: "otp-restore-password"
-        numPartitions: 1
-        replicationFactor: 1
+      otp:
+        login:
+          name: "otp-login"
+          numPartitions: 1
+          replicationFactor: 1
+        registration:
+          name: "otp-registration"
+          numPartitions: 1
+          replicationFactor: 1
+        restore-password:
+          name: "otp-restore-password"
+          numPartitions: 1
+          replicationFactor: 1
+      notifications:
+        user-verification-status:
+          name: "user-verification-status"
+          numPartitions: 1
+          replicationFactor: 1
 

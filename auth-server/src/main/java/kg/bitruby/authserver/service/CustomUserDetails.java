@@ -51,7 +51,7 @@ public class CustomUserDetails implements UserDetails {
     return true;
   }
 
-  public boolean isUserDataNonPending() {return user.isUserDataNonPending();}
+  public boolean isUserDataNonPending() {return user.isVerified();}
 
   @Override
   public boolean isCredentialsNonExpired() {

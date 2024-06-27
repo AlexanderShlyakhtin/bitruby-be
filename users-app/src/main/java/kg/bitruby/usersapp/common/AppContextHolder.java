@@ -15,8 +15,12 @@ public final class AppContextHolder {
 
     private AppContextHolder() {}
     private static final ThreadLocal<RequestContext> contextThreadLocal = new ThreadLocal<>();
-    public static void setContext(UUID rqUid) {
+    private static final ThreadLocal<UserContext> contextUserThreadLocal = new ThreadLocal<>();
+    public static void setRqUid(UUID rqUid) {
         contextThreadLocal.set(new RequestContext(rqUid));
+    }
+    public static void setUserId(UUID userId) {
+        contextUserThreadLocal.set(new UserContext(userId));
     }
     public static UUID getContextRequestId() {
         return Optional.ofNullable(contextThreadLocal.get())
@@ -27,8 +31,15 @@ public final class AppContextHolder {
                 });
     }
 
+    public static UUID getContextUserId() {
+        return Optional.ofNullable(contextUserThreadLocal.get())
+            .map(UserContext::getUserId)
+            .orElse(null);
+    }
+
     public static void cleanContext() {
         contextThreadLocal.remove();
+        contextUserThreadLocal.remove();;
     }
 
     @Getter
@@ -36,6 +47,13 @@ public final class AppContextHolder {
     @AllArgsConstructor
     private static class RequestContext {
         private final UUID requestId;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    private static class UserContext {
+        private final UUID userId;
     }
 
 }

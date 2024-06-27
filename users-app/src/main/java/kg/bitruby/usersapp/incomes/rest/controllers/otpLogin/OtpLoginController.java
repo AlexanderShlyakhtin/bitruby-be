@@ -1,8 +1,7 @@
-package kg.bitruby.usersapp.incomes.controllers.otpLogin;
+package kg.bitruby.usersapp.incomes.rest.controllers.otpLogin;
 
 import kg.bitruby.usersapp.api.OtpLoginApiDelegate;
 import kg.bitruby.usersapp.api.model.Base;
-import kg.bitruby.usersapp.api.model.OtpCode;
 import kg.bitruby.usersapp.api.model.OtpCodeLogin;
 import kg.bitruby.usersapp.core.otp.OtpService;
 import lombok.RequiredArgsConstructor;

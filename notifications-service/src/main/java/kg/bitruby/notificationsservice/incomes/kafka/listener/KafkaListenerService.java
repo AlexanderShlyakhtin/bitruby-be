@@ -40,13 +40,13 @@ public class KafkaListenerService {
     notificationService.sendNotificationRegistrationEvent(otpEventDto);
   }
 
-//  @KafkaListener(topics = "#{kafkaConsumerProperties.otpRestorePassword }")
-//  public void listenToOtpRestorePasswordTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String event) {
-//    AppContextHolder.setContext(UUID.fromString(key));
-//    log.info("Kafka event value: {}", event);
-//    OtpEventDto otpEventDto = mapToDtoNewMerchant(event);
-//    notificationService.sendNotificationRestorePasswordEvent(otpEventDto);
-//  }
+  @KafkaListener(topics = "#{kafkaConsumerProperties.otpRestorePassword }")
+  public void listenToOtpRestorePasswordTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String event) {
+    AppContextHolder.setContext(UUID.fromString(key));
+    log.info("Kafka event value: {}", event);
+    OtpEventDto otpEventDto = mapToDtoNewMerchant(event);
+    notificationService.sendNotificationRestorePasswordEvent(otpEventDto);
+  }
 
   private OtpEventDto mapToDtoNewMerchant(String s) {
     try {

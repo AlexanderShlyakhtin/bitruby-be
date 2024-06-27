@@ -1,18 +1,15 @@
 package kg.bitruby.usersapp.core.otp;
 
 import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
-import kg.bitruby.usersapp.api.model.Base;
-import kg.bitruby.usersapp.api.model.GrantType;
-import kg.bitruby.usersapp.api.model.OtpCode;
-import kg.bitruby.usersapp.api.model.OtpCodeLogin;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
+import kg.bitruby.usersapp.api.model.*;
 import kg.bitruby.usersapp.outcomes.kafka.service.KafkaProducerService;
 import kg.bitruby.usersapp.outcomes.postgres.domain.OtpLoginTokenEntity;
 import kg.bitruby.usersapp.outcomes.postgres.domain.OtpRegistrationTokenEntity;
 import kg.bitruby.usersapp.outcomes.postgres.domain.OtpRestorePasswordTokenEntity;
 import kg.bitruby.usersapp.outcomes.postgres.domain.UserEntity;
-import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.OtpLoginTokenRepository;
+import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRestorePasswordTokenEntityRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.Random;
 
 @Service
@@ -30,7 +28,6 @@ import java.util.Random;
 @Slf4j
 public class OtpService {
   private final OtpRestorePasswordTokenEntityRepository otpRestorePasswordTokenEntityRepository;
-
   private final OtpRegistrationTokenRepository otpRegistrationTokenEntityRepository;
   private final UserRepository userRepository;
   private final OtpLoginTokenRepository otpTokenRepository;
@@ -65,17 +62,21 @@ public class OtpService {
   @Transactional(transactionManager = "transactionManager")
   public Base generateOtpCodeForRegistration(OtpCode otpCode) {
     String sendTo = otpCode.getSendTo();
-    if(otpCode.getGrantType().equals(GrantType.EMAIL_PASSWORD)) {
-      userRepository.findByEmail(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
-          "User not exists"));
-    } else if (otpCode.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      userRepository.findByPhone(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
-          "User not exists"));
-    }
+    checkUserWithToken(otpCode.getGrantType(), sendTo);
     String code = generateRandomCode();
     kafkaProducerService.emitOtpRegistrationEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
     otpRegistrationTokenEntityRepository.save(new OtpRegistrationTokenEntity(sendTo, code, true));
     return new Base(true, OffsetDateTime.now());
+  }
+
+  private void checkUserWithToken(GrantType grantType, String sendTo) {
+    if(grantType.equals(GrantType.EMAIL_PASSWORD)) {
+      userRepository.findByEmail(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
+          "User not exists"));
+    } else if (grantType.equals(GrantType.PHONE_PASSWORD)) {
+      userRepository.findByPhone(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
+          "User not exists"));
+    } else throw new BitrubyRuntimeExpection("Unknown Grant type");
   }
 
 
@@ -91,16 +92,23 @@ public class OtpService {
   @Transactional(transactionManager = "transactionManager")
   public Base generateOtpCodeForRestoringPassword(OtpCode otpCode) {
     String sendTo = otpCode.getSendTo();
-    if(otpCode.getGrantType().equals(GrantType.EMAIL_PASSWORD)) {
-      userRepository.findByEmail(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
-          "User not exists"));
-    } else if (otpCode.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      userRepository.findByPhone(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection(
-          "User not exists"));
-    }
+    checkUserWithToken(otpCode.getGrantType(), sendTo);
     String code = generateRandomCode();
     kafkaProducerService.emitOtpRestorePasswordEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
     otpRestorePasswordTokenEntityRepository.save(new OtpRestorePasswordTokenEntity(sendTo, code, true));
+    return new Base(true, OffsetDateTime.now());
+  }
+
+  @Transactional
+  public Base checkOtpCodeForRestoringPassword(OtpCodeRestorePassword otpCodeRestorePassword) {
+    String sendTo = otpCodeRestorePassword.getSendTo();
+    checkUserWithToken(otpCodeRestorePassword.getGrantType(), sendTo);
+    OtpRestorePasswordTokenEntity token =
+        otpRestorePasswordTokenEntityRepository.findByToken(otpCodeRestorePassword.getOtp())
+            .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
+    if(!token.getExpirationTime().after(new Date())) {
+      throw new BitrubyRuntimeExpection("Token is not valid");
+    }
     return new Base(true, OffsetDateTime.now());
   }
 }

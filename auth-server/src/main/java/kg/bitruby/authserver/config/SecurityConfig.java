@@ -190,6 +190,7 @@ public class SecurityConfig {
         UserEntity userInfo = getUserInfo(context, userInfoService);
         String level = determineUserLevel(userInfo);
         context.getClaims().claim("level", level);
+        context.getClaims().claim("sub", userInfo.getEmail());
       }
     };
   }
@@ -240,11 +241,13 @@ public class SecurityConfig {
   }
 
   private String determineUserLevel(UserEntity userInfo) {
-    if (!userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete() && userInfo.isAccountNonLocked()) {
-      return "0";
+    if(!userInfo.isEnabled()) {
+      throw new OAuth2AuthenticationException("Account not enable");
     } else if (!userInfo.isAccountNonLocked()) {
       return "100";
-    } else if (userInfo.isUserDataNonPending() && !userInfo.isRegistrationComplete()) {
+    } else if (!userInfo.isVerified() && !userInfo.isBybitAccountCreated() && !userInfo.isRegistrationComplete() ) {
+      return "0";
+    }  else if (userInfo.isVerified() && userInfo.isBybitAccountCreated() && !userInfo.isRegistrationComplete()) {
       return "1";
     } else if (userInfo.isRegistrationComplete()) {
       return "2";

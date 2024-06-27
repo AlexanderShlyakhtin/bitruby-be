@@ -18,8 +18,14 @@ public class UsersEventListener {
   }
 
   @EventListener(UserCompleteRegistrationEvent.class)
-  public void userCompleteRegistrationEventEventListener(UserCompleteRegistrationEvent event) {
+  public void userCompleteRegistrationEventListener(UserCompleteRegistrationEvent event) {
     log.info("User complete registration with email {}",
+        event.getUser().getEmail());
+  }
+
+  @EventListener(UserVerificationDecisionEvent.class)
+  public void userVerifiedEventListener(UserVerificationDecisionEvent event) {
+    log.info("User verified event {}",
         event.getUser().getEmail());
   }
 

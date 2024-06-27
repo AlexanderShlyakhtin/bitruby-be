@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: BitRuby-Veriff integation API service
+  description: Swagger for Veriff service
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: The URL prefix for API server
+tags:
+  - name: verification
+paths:
+  /public/verification/event:
+    post:
+      summary: Verification event hooks
+      operationId: verificationEvent
+      parameters:
+        - $ref: '#/components/parameters/XAuthClient'
+        - $ref: '#/components/parameters/XSignature'
+        - $ref: '#/components/parameters/XHmacSignature'
+      tags:
+        - verification
+      requestBody:
+        $ref: '#/components/requestBodies/VerificationEventRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+  /public/verification/decision:
+    post:
+      summary: Verification decision  hooks
+      operationId: verificationDecision
+      parameters:
+        - $ref: '#/components/parameters/XAuthClient'
+        - $ref: '#/components/parameters/XSignature'
+        - $ref: '#/components/parameters/XHmacSignature'
+      tags:
+        - verification
+      requestBody:
+        $ref: '#/components/requestBodies/VerificationDecisionRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    InternalServerError:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequestError:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    EmptyResponse:
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      description: >-
+        response with no body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Base'
+
+  requestBodies:
+    VerificationEventRequest:
+      description: >-
+        Verification Event Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerificationEvent'
+    VerificationDecisionRequest:
+      description: >-
+        Verification Event Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/VerificationDecision'
+  parameters:
+    RequestId:
+      name: x-request-id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XAuthClient:
+      name: X-Auth-Client
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XSignature:
+      name: X-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+    XHmacSignature:
+      name: X-Hmac-Signature
+      in: header
+      required: true
+      schema:
+        type: string
+  schemas:
+    Base:
+      type: object
+      required:
+        - success
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: >-
+            Влад сказал, что параметр обязательный для сервисов на ГО
+        timestamp:
+          type: string
+          format: date-time
+          description: >-
+            Время отправки ответа на запрос
+    Error:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - code
+            - message
+            - payload
+          properties:
+            code:
+              type: string
+              description: code of error
+              example: "10"
+            message:
+              type: string
+              description: code of error
+              example: Text about reaosn of error
+            payload:
+              type: array
+              items:
+                type: string
+                description: description
+                example: example
+    EventAction:
+      type: string
+      description: >-
+        string (required) Corresponding action description (one of started, submitted)
+      enum:
+        - started
+        - submitted
+        - waiting_complete
+        - waiting_continued
+        - flow_finished
+        - flow_cancelled
+    EventCode:
+      type: integer
+      description: >-
+        integer (required) Event code (one of 7001, 7002)
+      enum:
+        - 7001
+        - 7002
+        - 7007
+        - 7008
+        - 7009
+        - 7010
+    VerificationEvent:
+      type: object
+      required:
+        - id
+        - attemptId
+        - feature
+        - code
+        - action
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >-
+            string (required) UUID v4 which identifies the verification session
+        attemptId:
+          type: string
+          format: uuid
+          description: >-
+            string (required) UUID v4 which identifies session attempt
+        feature:
+          type: string
+          description: >-
+            string (required) Feature on which the event was triggered ("selfid" refers to the end-user flow)
+        code:
+          $ref: '#/components/schemas/EventCode'
+        action:
+          $ref: '#/components/schemas/EventAction'
+        vendorData:
+          type: string
+          description: >-
+            string Client-specific data string, max 1000 characters long, set during session creation. We require only non-semantic data to be submitted (UUID-s etc., that can not be resolved or used outside the client's domain)
+          maxLength: 1000
+    DecisionStatus:
+      type: string
+      enum:
+        - approved
+        - resubmission_requested
+        - review
+        - declined
+        - expired
+        - abandoned
+      description: Verification status
+    DecisionCode:
+      type: integer
+      enum:
+        - 9001
+        - 9102
+        - 9103
+        - 9104
+        - 9121
+      description: Verification session decision code
+    DocumentType:
+      type: string
+      nullable: true
+      enum:
+        - PASSPORT
+        - ID_CARD
+        - RESIDENCE_PERMIT
+        - DRIVERS_LICENSE
+        - VISA
+        - OTHER
+      description: Document type
+    AdressListItem:
+      type: object
+      properties:
+        fullAddress:
+          type: string
+          nullable: true
+          description: Address as single string
+        parsedAddress:
+          type: object
+          nullable: true
+          properties:
+            country:
+              type: string
+              nullable: true
+            state:
+              type: string
+              nullable: true
+            city:
+              type: string
+              nullable: true
+            postcode:
+              type: string
+              nullable: true
+            street:
+              type: string
+              nullable: true
+            houseNumber:
+              type: string
+              nullable: true
+            unit:
+              type: string
+              nullable: true
+    Person:
+      type: object
+      required:
+        - idNumber
+      properties:
+        firstName:
+          type: string
+          nullable: true
+          description: Person's first name
+        lastName:
+          type: string
+          nullable: true
+          description: Person's last name
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth (YYYY-MM-DD)
+        gender:
+          type: string
+          nullable: true
+          enum:
+            - M
+            - F
+          description: Gender
+        nationality:
+          type: string
+          nullable: true
+          description: Nationality
+        idNumber:
+          type: string
+          format: uuid
+          description: National identification number
+        yearOfBirth:
+          type: string
+          nullable: true
+          description: Year of birth (YYYY)
+        placeOfBirth:
+          type: string
+          nullable: true
+          description: Place of birth
+        citizenship:
+          type: string
+          nullable: true
+          description: Deprecated field
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdressListItem'
+        fullName:
+          type: string
+          nullable: true
+          description: Full name of the person (Indian Aadhaar cards specific)
+        occupation:
+          type: string
+          nullable: true
+          description: Occupation data from the document
+        employer:
+          type: string
+          nullable: true
+          description: Employer's name from the document
+        foreginerStatus:
+          type: string
+          nullable: true
+          description: Foreigner status field from the document
+        extraNames:
+          type: string
+          nullable: true
+          description: Additional name from the document
+        ifeIdentifier:
+          type: string
+          nullable: true
+          description: Voter's card identifier (OCR)
+        ineIdentifier:
+          type: string
+          nullable: true
+          description: Citizen's identifier
+        pepSanctionMatch:
+          type: string
+          nullable: true
+          description: PEP check result
+    Document:
+      type: object
+      properties:
+        number:
+          type: string
+          nullable: true
+          description: Document number
+        validUntil:
+          type: string
+          format: date
+          nullable: true
+          description: Document valid until date (YYYY-MM-DD)
+        validFrom:
+          type: string
+          format: date
+          nullable: true
+          description: Document valid from date (YYYY-MM-DD)
+        type:
+          $ref: '#/components/schemas/DocumentType'
+        country:
+          type: string
+          nullable: true
+          description: Document issuing country (ISO 3166 alpha)
+    VerificationDecision:
+      type: object
+      required:
+        - status
+        - verification
+      properties:
+        status:
+          type: string
+          description: Status of the response
+        verification:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: UUID v4 which identifies the verification session
+            vendorData:
+              type: string
+              nullable: true
+              description: Client-specific data string. Null if not available.
+            status:
+              $ref: '#/components/schemas/DecisionStatus'
+            code:
+              $ref: '#/components/schemas/DecisionCode'
+            reason:
+              type: string
+              nullable: true
+              description: Reason of failed Verification
+            reasonCode:
+              type: integer
+              nullable: true
+              description: Reason code of failed Verification
+            decisionTime:
+              type: string
+              format: date-time
+              description: Timestamp of the decision in UTC
+            acceptanceTime:
+              type: string
+              format: date-time
+              description: Timestamp of the session generation in UTC
+            person:
+              $ref: '#/components/schemas/Person'
+            document:
+              $ref: '#/components/schemas/Document'

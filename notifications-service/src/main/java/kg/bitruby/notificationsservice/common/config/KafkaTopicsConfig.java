@@ -16,25 +16,25 @@ public class KafkaTopicsConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
-  @Value("${bitruby.kafka.topics.otp-login.name}")
+  @Value("${bitruby.kafka.topics.otp.login.name}")
   private String otpLoginTopic;
-  @Value("${bitruby.kafka.topics.otp-login.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.login.numPartitions}")
   private int otpLoginTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-login.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.login.replicationFactor}")
   private short otpLoginTopicReplicationFactor;
 
-  @Value("${bitruby.kafka.topics.otp-registration.name}")
+  @Value("${bitruby.kafka.topics.otp.registration.name}")
   private String otpRegistrationTopic;
-  @Value("${bitruby.kafka.topics.otp-registration.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.registration.numPartitions}")
   private int otpRegistrationTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-registration.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.registration.replicationFactor}")
   private short otpRegistrationTopicReplicationFactor;
 
-  @Value("${bitruby.kafka.topics.otp-restore-password.name}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.name}")
   private String otpRestorePasswordTopic;
-  @Value("${bitruby.kafka.topics.otp-restore-password.numPartitions}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.numPartitions}")
   private int otpRestorePasswordTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp-restore-password.replicationFactor}")
+  @Value("${bitruby.kafka.topics.otp.restore-password.replicationFactor}")
   private short otpRestorePasswordTopicReplicationFactor;
 
 
