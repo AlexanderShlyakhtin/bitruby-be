@@ -11,8 +11,8 @@ tags:
 paths:
   /{login}/sendEmail:
     post:
-      summary: Send a test email
-      operationId: sendTestEmail
+      summary: Send email
+      operationId: sendEmail
       tags:
         - email
       parameters:
@@ -48,7 +48,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SemdEmailResult'
+            $ref: '#/components/schemas/SendEmailResult'
 
   parameters:
     XRequestId:
@@ -120,6 +120,8 @@ components:
       properties:
         action:
           type: string
+          enum:
+            - issue.send
           example: issue.send
           description: The action to be performed
         letter:
@@ -145,7 +147,7 @@ components:
           type: string
           description: Your API key
           example: ВАШ API КЛЮЧ
-    SemdEmailResult:
+    SendEmailResult:
       type: object
       properties:
         track.id:

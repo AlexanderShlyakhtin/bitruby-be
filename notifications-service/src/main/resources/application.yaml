@@ -9,6 +9,12 @@ spring:
       group-id: "bitruby-notifications-service"
 
 bitruby:
+  sendSay:
+    active: true
+    url: https://api.sendsay.ru/general/api/v100/json/
+    apiKey: 18Wf7IhvBZ7ToE1IRdZk5uKpAg-pE6kPqlU8VhnP3Wcv8lde0xre4ttWJTq2k5JaU
+    apiLogin: bitruby
+    emailFrom: info@biruby.kg
   kafka:
     topics:
       otp:
