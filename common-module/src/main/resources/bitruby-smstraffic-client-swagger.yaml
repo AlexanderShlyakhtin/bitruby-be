@@ -35,7 +35,7 @@ components:
       content:
         text/xml:
           schema:
-            type: object
+            $ref: '#/components/schemas/Reply'
   requestBodies:
     SendSmsRequest:
       required: true

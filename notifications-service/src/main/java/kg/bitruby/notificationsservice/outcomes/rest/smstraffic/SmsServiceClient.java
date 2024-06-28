@@ -30,7 +30,7 @@ public class SmsServiceClient {
 
   public Reply sendSms(String phone, String message) {
     if(Boolean.TRUE.equals(active)) {
-      return safeCall( () ->  map(smsApi.multiPhpPost(
+      return safeCall( () ->  smsApi.multiPhpPost(
           login,
           password,
           phone,
@@ -49,7 +49,7 @@ public class SmsServiceClient {
           null,
           null,
           null
-          )));
+          ));
     } else {
       log.info("Sms service disable. Sms payload: Phone: {}, Message: {}", phone, message);
       return new Reply();
@@ -77,12 +77,5 @@ public class SmsServiceClient {
     }
 
     R acceptThrows();
-  }
-  private Reply map(Object source) {
-    try {
-      return objectMapper.convertValue(source, Reply.class);
-    } catch (Exception e) {
-      throw new BitrubyRuntimeExpection("Deserialization SMS response error", e);
-    }
   }
 }
