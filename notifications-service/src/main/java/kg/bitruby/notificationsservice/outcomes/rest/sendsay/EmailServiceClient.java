@@ -1,4 +1,4 @@
-package kg.bitruby.notificationsservice.outcomes.email;
+package kg.bitruby.notificationsservice.outcomes.rest.sendsay;
 
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.notificationsservice.client.sendsay.api.EmailApi;

@@ -381,9 +381,6 @@ components:
         password:
           type: string
           format: password
-        description:
-          type: string
-
     VerificationStatus:
       type: string
       enum:

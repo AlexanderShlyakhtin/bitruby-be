@@ -29,13 +29,13 @@ components:
       content:
         text/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            type: object
     SendSmsResponse:
       description: Successful response
       content:
         text/xml:
           schema:
-            $ref: '#/components/schemas/SendSmsResult'
+            type: object
   requestBodies:
     SendSmsRequest:
       required: true
@@ -45,56 +45,47 @@ components:
             $ref: '#/components/schemas/SendSms'
 
   schemas:
-    Error:
+    Reply:
       type: object
+      xml:
+        name: 'reply'
       properties:
-        reply:
-          type: object
-          properties:
-            result:
-              type: string
-              description: Result of the operation
-              example: ERROR
-            code:
-              type: integer
-              description: Error code
-              example: 401
-            description:
-              type: string
-              description: Description of the error
-              example: login param is missing
-    SendSmsResult:
-      type: object
-      properties:
-        reply:
-          type: object
-          properties:
-            result:
-              type: string
-              description: Result of the operation
-              example: OK
-            code:
-              type: integer
-              description: Response code
-              example: 0
-            description:
-              type: string
-              description: Description of the result
-              example: queued 1 messages
-            message_infos:
-              type: array
-              items:
-                type: object
-                properties:
-                  phone:
-                    type: string
-                    example: 79051112233
-                  sms_id:
-                    type: string
-                    example: 1000472891
-                  push_id:
-                    type: string
-                    example: push_id1
+        result:
+          type: string
+          description: Result of the operation
+          example: OK
+        code:
+          type: integer
+          description: Response code
+          example: 0
+        description:
+          type: string
+          description: Description of the result
+          example: queued 1 messages
+        messageInfos:
+          type: array
+          xml:
+            wrapped : true
+            name: message_infos
+          items:
+            type: object
+            xml:
+              name: message_info
+            properties:
+              phone:
+                type: string
+                example: 79051112233
+              smsId:
+                type: string
+                xml:
+                  name: sms_id
+                example: 1000472891
+              pushId:
+                type: string
+                xml:
+                  name: push_id
+                example: push_id1
+
     SendSms:
       type: object
       required:

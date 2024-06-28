@@ -1,9 +1,9 @@
-package kg.bitruby.notificationsservice.outcomes.sms;
+package kg.bitruby.notificationsservice.outcomes.rest.smstraffic;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.notificationsservice.client.smstraffic.api.SmsApi;
-import kg.bitruby.notificationsservice.client.smstraffic.api.model.SendSmsResult;
-import kg.bitruby.notificationsservice.outcomes.email.EmailServiceClient;
+import kg.bitruby.notificationsservice.client.smstraffic.api.model.Reply;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +23,14 @@ public class SmsServiceClient {
   private String password;
 
   @Value("${bitruby.smsTraffic.active}")
-  private String active;
+  private Boolean active;
 
   private final SmsApi smsApi;
+  private final ObjectMapper objectMapper;
 
-  public SendSmsResult sendSms(String phone, String message) {
+  public Reply sendSms(String phone, String message) {
     if(Boolean.TRUE.equals(active)) {
-      return safeCall( () ->  smsApi.multiPhpPost(
+      return safeCall( () ->  map(smsApi.multiPhpPost(
           login,
           password,
           phone,
@@ -48,14 +49,14 @@ public class SmsServiceClient {
           null,
           null,
           null
-          ));
+          )));
     } else {
       log.info("Sms service disable. Sms payload: Phone: {}, Message: {}", phone, message);
-      return new SendSmsResult();
+      return new Reply();
     }
   }
 
-  private <R> R safeCall(EmailServiceClient.SafeCallConsumer<R> safeCall) {
+  private <R> R safeCall(SafeCallConsumer<R> safeCall) {
     return safeCall.get();
   }
 
@@ -69,13 +70,19 @@ public class SmsServiceClient {
       } catch (Exception e) {
         throw new BitrubyRuntimeExpection(
             String.format(
-                "Error. Can't process request to Veriff server. Error message: %s",
-                e.getMessage()),
+                "Error. Can't process request to SMS Traffic server. Error message: %s", e.getMessage()),
             e);
       }
       return result;
     }
 
     R acceptThrows();
+  }
+  private Reply map(Object source) {
+    try {
+      return objectMapper.convertValue(source, Reply.class);
+    } catch (Exception e) {
+      throw new BitrubyRuntimeExpection("Deserialization SMS response error", e);
+    }
   }
 }

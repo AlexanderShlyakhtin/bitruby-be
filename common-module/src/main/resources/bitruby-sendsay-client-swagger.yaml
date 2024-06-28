@@ -66,24 +66,26 @@ components:
       schema:
         type: string
   schemas:
+    ErrorPayloadList:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: >-
+              Код ошибки
+          explain:
+            type: string
+            description: >-
+              возможное более развёрнутое описание
     Error:
       type: object
       required:
         - errors
       properties:
         errors:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                description: >-
-                  Код ошибки
-              explain:
-                type: string
-                description: >-
-                  возможное более развёрнутое описание
+          $ref: '#/components/schemas/ErrorPayloadList'
     Letter:
       type: object
       required:
@@ -156,8 +158,13 @@ components:
           type: string
         duration:
           type: number
+        errors:
+          $ref: '#/components/schemas/ErrorPayloadList'
+        warnings:
+          $ref: '#/components/schemas/ErrorPayloadList'
+        sublogin:
+          type: string
         channel:
           type: string
         _ehid:
           type: string
-

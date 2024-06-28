@@ -1,4 +1,4 @@
-package kg.bitruby.notificationsservice.outcomes.email.mapper;
+package kg.bitruby.notificationsservice.outcomes.rest.sendsay.mapper;
 
 import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
 import kg.bitruby.notificationsservice.client.sendsay.api.model.Letter;
@@ -30,7 +30,7 @@ public class OtpEventEmailMapper {
     sendEmail.setAction(SendEmail.ActionEnum.ISSUE_SEND);
     sendEmail.setSendwhen(SendEmail.SendwhenEnum.NOW);
     //TODO: Define group
-    sendEmail.setGroup("Test");
+    sendEmail.setGroup("personal");
     sendEmail.setApikey(apiKey);
 
     return sendEmail;

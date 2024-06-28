@@ -13,7 +13,7 @@ public class VeriffApiConfig {
   private String baseUrl;
 
   @Bean
-  public ApiClient apiClient() {
+  public ApiClient veriffAPiClient() {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(baseUrl);
     return apiClient;
@@ -21,6 +21,6 @@ public class VeriffApiConfig {
 
   @Bean
   public VerificationApi verificationApi() {
-    return new VerificationApi(apiClient());
+    return new VerificationApi(veriffAPiClient());
   }
 }

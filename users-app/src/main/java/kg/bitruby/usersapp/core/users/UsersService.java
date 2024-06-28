@@ -195,6 +195,7 @@ public class UsersService {
       verificationSessions.setSessionUrl(session.getVerification().getUrl());
       verificationSessions.setActive(true);
       verificationSessions.setCreated(OffsetDateTime.now());
+      verificationSessions.setUpdated(OffsetDateTime.now());
       verificationSessions.setUserId(userEntity);
       verificationSessions.setStatus(VerificationSessionStatus.WAITING_FOR_START);
       verificationSessionsRepository.save(verificationSessions);

@@ -30,7 +30,7 @@ public class UsersVerificationSessions {
 
   @Column(name = "created", nullable = false)
   private OffsetDateTime created;
-  @Column(name = "created", nullable = false)
+  @Column(name = "updated", nullable = false)
   private OffsetDateTime updated;
 
   @ManyToOne(fetch = FetchType.EAGER)

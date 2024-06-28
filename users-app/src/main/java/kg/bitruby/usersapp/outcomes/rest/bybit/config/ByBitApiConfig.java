@@ -13,7 +13,7 @@ public class ByBitApiConfig {
   private String baseUrl;
 
   @Bean
-  public ApiClient apiClient() {
+  public ApiClient bybitApiClient() {
     ApiClient apiClient = new ApiClient();
     apiClient.setBasePath(baseUrl);
     return apiClient;
@@ -21,6 +21,6 @@ public class ByBitApiConfig {
 
   @Bean
   public AccountApi accountApi() {
-    return new AccountApi(apiClient());
+    return new AccountApi(bybitApiClient());
   }
 }
