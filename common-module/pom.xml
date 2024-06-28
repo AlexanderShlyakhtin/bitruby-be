@@ -205,6 +205,27 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-bybit-api-client</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-bybit-client-swagger.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <apiPackage>kg.bitruby.usersapp.client.bybit.api</apiPackage>
+                            <modelPackage>kg.bitruby.usersapp.client.bybit.api.model</modelPackage>
+                            <invokerPackage>kg.bitruby.usersapp.client.bybit.api.invoker</invokerPackage>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <library>resttemplate</library>
+                            <configOptions>
+                                <useTags>true</useTags>
+                                <openApiNullable>true</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

@@ -63,7 +63,14 @@ management:
         include: '*'
 
 bitruby:
+  bybit:
+    active: true
+    bybit-api-secret: ''
+    bybit-api-key: ''
+    recvWindow: 50000
+    url: ''
   verification:
+    active: true
     secret-key: c3198047-7f8a-4f90-a6fe-1e4b22bc487b
     api-key: afee4a07-dd80-49d0-ba25-71580654fe9a
     callback-url: 'https://webhook.cool/at/quaint-shampoo-70'

@@ -1,0 +1,312 @@
+openapi: 3.0.3
+info:
+  title: Bitruby ByBit Integrator API
+  description: API forByBit system and performing related operations.
+  version: 1.0.0
+servers:
+  - url: https://api.bybit.com
+
+tags:
+  - name: account
+    description: >-
+      User Management and API Key Management
+
+paths:
+  /v5/user/create-sub-member:
+    post:
+      summary: Create Sub UID
+      description: Create a new sub-user ID using the master account's API key.
+      operationId: createSubAccount
+      parameters:
+        - $ref: '#/components/parameters/XBAPISIGN'
+        - $ref: '#/components/parameters/XBAPIAPIKEY'
+        - $ref: '#/components/parameters/XBAPITIMESTAMP'
+        - $ref: '#/components/parameters/XBAPIRECVWINDOW'
+      tags:
+        - account
+      requestBody:
+        $ref: '#/components/requestBodies/CreateSubAccountRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateSubAccountResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+        '5XX':
+          $ref: '#/components/responses/Error'
+
+  /v5/user/create-sub-api:
+    post:
+      summary: Create Sub UID API Key
+      description: Create a new API key for a newly created sub-UID.
+      operationId: createSubAccountApiKey
+      parameters:
+        - $ref: '#/components/parameters/XBAPISIGN'
+        - $ref: '#/components/parameters/XBAPIAPIKEY'
+        - $ref: '#/components/parameters/XBAPITIMESTAMP'
+        - $ref: '#/components/parameters/XBAPIRECVWINDOW'
+      tags:
+        - account
+      requestBody:
+        $ref: '#/components/requestBodies/CreateSubAccountApiKey'
+      responses:
+        '200':
+          $ref: '#/components/responses/CreateSubAccountApiKeyResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+        '5XX':
+          $ref: '#/components/responses/Error'
+
+components:
+  requestBodies:
+    CreateSubAccountRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateSubMember'
+    CreateSubAccountApiKey:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateSubApiRequest'
+
+  responses:
+    Error:
+      description: Successfully created sub-user API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    CreateSubAccountApiKeyResponse:
+      description: Successfully created sub-user API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateSubApiResult'
+    CreateSubAccountResponse:
+      description: Successfully created sub-user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreateSubAccountResult'
+  parameters:
+    XBAPISIGN:
+      name: X-BAPI-SIGN
+      in: header
+      required: true
+      schema:
+        type: string
+    XBAPIAPIKEY:
+      name: X-BAPI-API-KEY
+      in: header
+      required: true
+      schema:
+        type: string
+    XBAPITIMESTAMP:
+      name: X-BAPI-TIMESTAMP
+      in: header
+      required: true
+      schema:
+        type: integer
+        format: int64
+    XBAPIRECVWINDOW:
+      name: X-BAPI-RECV-WINDOW
+      in: header
+      required: true
+      schema:
+        type: integer
+        format: int64
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+    CreateSubAccountResult:
+      type: object
+      properties:
+        retCode:
+          type: integer
+        retMsg:
+          type: string
+        result:
+          type: object
+          properties:
+            uid:
+              type: string
+            username:
+              type: string
+            memberType:
+              type: integer
+            status:
+              type: integer
+            remark:
+              type: string
+        retExtInfo:
+          type: object
+        time:
+          type: integer
+    CreateSubMember:
+      type: object
+      required:
+        - username
+        - memberType
+      properties:
+        username:
+          type: string
+          maxLength: 16
+          minLength: 6
+          description: |
+            Username for the new sub-user ID.
+            Must be 6-16 characters long, including both numbers and letters.
+        password:
+          type: string
+          maxLength: 30
+          minLength: 8
+          description: |
+            Password for the new sub-user ID.
+            Must be 8-30 characters long, including numbers, upper and lowercase letters.
+        memberType:
+          type: integer
+          description: Type of sub account.
+          enum:
+            - 1
+          default: 1
+        switch:
+          type: integer
+          description: Quick login setting.
+          enum: [0, 1]
+          default: 0
+        isUta:
+          type: boolean
+          description: Indicates if the account is a UTA account.
+        note:
+          type: string
+          description: Remark for the new sub-user.
+    CreateSubApiRequest:
+      type: object
+      required:
+        - subuid
+        - readOnly
+        - permissions
+      properties:
+        subuid:
+          type: integer
+          description: Sub user ID.
+        note:
+          type: string
+          description: Remark (optional).
+        readOnly:
+          type: integer
+          description: Access rights.
+          enum: [0, 1]
+          default: 0
+        ips:
+          type: string
+          description: |
+            IP binding for the API key.
+            Example: "192.168.0.1,192.168.0.2".
+            Use "*" or omit to indicate no binding.
+        permissions:
+          type: object
+          properties:
+            ContractTrade:
+              type: array
+              items:
+                type: string
+                enum:
+                  - Order
+                  - Position
+            Spot:
+              type: array
+              items:
+                type: string
+                enum:
+                  - SpotTrade
+            Wallet:
+              type: array
+              items:
+                type: string
+                enum:
+                  - AccountTransfer
+                  - SubMemberTransferList
+            Options:
+              type: array
+              items:
+                type: string
+                enum:
+                  - OptionsTrade
+            Exchange:
+              type: array
+              items:
+                type: string
+                enum:
+                  - ExchangeHistory
+            CopyTrading:
+              type: array
+              items:
+                type: string
+                enum:
+                  - CopyTrading
+    CreateSubApiResult:
+      type: object
+      properties:
+        retCode:
+          type: integer
+        retMsg:
+          type: string
+        retExtInfo:
+          type: object
+        time:
+          type: integer
+        result:
+          type: object
+          properties:
+            id:
+              type: string
+            note:
+              type: string
+            apiKey:
+              type: string
+            readOnly:
+              type: integer
+            secret:
+              type: string
+            permissions:
+              type: object
+              properties:
+                ContractTrade:
+                  type: array
+                  items:
+                    type: string
+                Spot:
+                  type: array
+                  items:
+                    type: string
+                Wallet:
+                  type: array
+                  items:
+                    type: string
+                Options:
+                  type: array
+                  items:
+                    type: string
+                CopyTrading:
+                  type: array
+                  items:
+                    type: string
+                BlockTrade:
+                  type: array
+                  items:
+                    type: string
+                Exchange:
+                  type: array
+                  items:
+                    type: string
+                NFT:
+                  type: array
+                  items:
+                    type: string
