@@ -1,12 +1,12 @@
-package kg.bitruby.usersapp.outcomes.rest.bybit.api;
+package kg.bitruby.bybitintegrator.outcomes.rest.bybit.api;
 
+import kg.bitruby.bybitintegrator.outcomes.rest.bybit.service.ByBitSignatureService;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.client.bybit.api.AccountApi;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubAccountResult;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubApiRequest;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubApiResult;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubMember;
-import kg.bitruby.usersapp.outcomes.rest.bybit.service.ByBitSignatureService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +47,10 @@ public class ByBitApiClient {
   public CreateSubAccountResult createSubAccount(CreateSubMember createSubMember) {
     if(Boolean.TRUE.equals(active)) {
       long epochMilli = System.currentTimeMillis();
-      return safeCall( () ->  accountApi.createSubAccount(byBitSignatureService.signPost(createSubMember, epochMilli), apiKey, epochMilli, recvWindow, createSubMember));
+      CreateSubAccountResult result = safeCall(() -> accountApi.createSubAccount(
+          byBitSignatureService.signPost(createSubMember, epochMilli), apiKey, epochMilli,
+          recvWindow, createSubMember));
+      return result;
     } else {
       return new CreateSubAccountResult();
     }

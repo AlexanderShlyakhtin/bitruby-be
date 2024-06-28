@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.outcomes.rest.bybit.config;
+package kg.bitruby.bybitintegrator.outcomes.rest.bybit.config;
 
 import kg.bitruby.usersapp.client.bybit.api.AccountApi;
 import kg.bitruby.usersapp.client.bybit.api.invoker.ApiClient;

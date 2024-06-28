@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.common.config;
+package kg.bitruby.bybitintegrator.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +20,6 @@ public class SecurityConfig {
 
     http
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/v1/public/**").permitAll()
-            .requestMatchers("/error").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 -> oauth2

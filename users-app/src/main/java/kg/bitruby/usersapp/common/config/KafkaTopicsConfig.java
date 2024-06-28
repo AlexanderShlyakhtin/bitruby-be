@@ -58,6 +58,13 @@ public class KafkaTopicsConfig {
   @Value("${bitruby.kafka.topics.notifications.user-verification-status.replicationFactor}")
   private short notificationsUserVerificationStatusTopicReplicationFactor;
 
+  @Value("${bitruby.kafka.topics.bybit.create-sub-account.name}")
+  private String createSubAccountTopic;
+  @Value("${bitruby.kafka.topics.bybit.create-sub-account.numPartitions}")
+  private int createSubAccountTopicNumPartitions;
+  @Value("${bitruby.kafka.topics.bybit.create-sub-account.replicationFactor}")
+  private short createSubAccountTopicReplicationFactor;
+
 
   // Configure KafkaAdmin bean
   @Bean
@@ -107,5 +114,11 @@ public class KafkaTopicsConfig {
   public NewTopic notificationsUserVerificationStatusTopic() {
     return new NewTopic(notificationsUserVerificationStatusDecisionsTopic, notificationsUserVerificationStatusTopicNumPartitions,
         notificationsUserVerificationStatusTopicReplicationFactor);
+  }
+
+  @Bean
+  public NewTopic createSubAccountTopic() {
+    return new NewTopic(createSubAccountTopic, createSubAccountTopicNumPartitions,
+        createSubAccountTopicReplicationFactor);
   }
 }

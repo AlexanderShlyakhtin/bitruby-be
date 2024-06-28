@@ -1,8 +1,8 @@
 server:
-  port: 8081
+  port: 8082
   address: 127.0.0.1
   servlet:
-    context-path: /users
+    context-path: /bybit-integrator
   error:
     include-message: always
     include-binding-errors: always
@@ -14,12 +14,12 @@ server:
 
 spring:
   application:
-    name: users-app
+    name: bybit-integrator
   liquibase:
     change-log: db/db.changelog.yaml
-    liquibase-schema: users
+    liquibase-schema: bybit
   datasource:
-    url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=users
+    url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=bybit
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -39,7 +39,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: "bitruby-users-app"
+      group-id: "bitruby-bybit-integrator"
 logging:
   level:
     org:
@@ -65,12 +65,12 @@ management:
 bitruby:
   auth:
     url: http://auth-server:9000/auth/api/v1
-  verification:
+  bybit:
     active: true
-    secret-key: c3198047-7f8a-4f90-a6fe-1e4b22bc487b
-    api-key: afee4a07-dd80-49d0-ba25-71580654fe9a
-    callback-url: 'https://webhook.cool/at/quaint-shampoo-70'
-    url: 'https://stationapi.veriff.com/v1'
+    bybit-api-secret: ''
+    bybit-api-key: ''
+    recvWindow: 50000
+    url: ''
   kafka:
     topics:
       bybit:
@@ -78,33 +78,7 @@ bitruby:
           name: "create-sub-account"
           numPartitions: 1
           replicationFactor: 1
-      otp:
-        login:
-          name: "otp-login"
-          numPartitions: 1
-          replicationFactor: 1
-        registration:
-          name: "otp-registration"
-          numPartitions: 1
-          replicationFactor: 1
-        restore-password:
-          name: "otp-restore-password"
-          numPartitions: 1
-          replicationFactor: 1
-      verification:
-        events:
-          name: "verification-events"
-          numPartitions: 1
-          replicationFactor: 1
-        decisions:
-          name: "verification-decisions"
-          numPartitions: 1
-          replicationFactor: 1
-      notifications:
-        user-verification-status:
-          name: "user-verification-status"
-          numPartitions: 1
-          replicationFactor: 1
+
 
 
 

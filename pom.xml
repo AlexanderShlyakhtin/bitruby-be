@@ -26,6 +26,7 @@
         <module>auth-server</module>
         <module>users-app</module>
         <module>notifications-service</module>
+        <module>bybit-integrator</module>
 
     </modules>
 

@@ -41,15 +41,7 @@ public class OtpService {
   public Base generateOtpCodeForLogin(OtpCodeLogin otpCode) {
     UserEntity userEntity;
     String sendTo = otpCode.getSendTo();
-    if(otpCode.getGrantType().equals(GrantType.EMAIL_PASSWORD)) {
-      userEntity = userRepository.findByEmail(sendTo)
-          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
-    } else if (otpCode.getGrantType().equals(GrantType.PHONE_PASSWORD)) {
-      userEntity = userRepository.findByPhone(sendTo)
-          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
-    } else {
-      throw new BitrubyRuntimeExpection("Unknown Grant Type");
-    }
+    userEntity = getUserEntity(otpCode.getGrantType(), sendTo);
     if(!passwordEncoder.matches(otpCode.getPassword(), userEntity.getPassword())) {
       throw new BitrubyRuntimeExpection("Неверная пара логин/пароль");
     }
@@ -92,6 +84,10 @@ public class OtpService {
   @Transactional(transactionManager = "transactionManager")
   public Base generateOtpCodeForRestoringPassword(OtpCode otpCode) {
     String sendTo = otpCode.getSendTo();
+    UserEntity userEntity = getUserEntity(otpCode.getGrantType(), sendTo);
+    if(!userEntity.isEnabled()) {
+      throw new BitrubyRuntimeExpection("Нельзя восстановить пароль для указанного пользователя");
+    }
     checkUserWithToken(otpCode.getGrantType(), sendTo);
     String code = generateRandomCode();
     kafkaProducerService.emitOtpRestorePasswordEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
@@ -105,10 +101,24 @@ public class OtpService {
     checkUserWithToken(otpCodeRestorePassword.getGrantType(), sendTo);
     OtpRestorePasswordTokenEntity token =
         otpRestorePasswordTokenEntityRepository.findByToken(otpCodeRestorePassword.getOtp())
-            .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
+            .orElseThrow(() -> new BitrubyRuntimeExpection("OTP токен не валидный"));
     if(!token.getExpirationTime().after(new Date())) {
-      throw new BitrubyRuntimeExpection("Token is not valid");
+      throw new BitrubyRuntimeExpection("OTP токен не валидный");
     }
     return new Base(true, OffsetDateTime.now());
+  }
+
+  private UserEntity getUserEntity(GrantType grantType, String sendTo) {
+    UserEntity userEntity;
+    if(grantType.equals(GrantType.EMAIL_PASSWORD)) {
+      userEntity = userRepository.findByEmail(sendTo)
+          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
+    } else if (grantType.equals(GrantType.PHONE_PASSWORD)) {
+      userEntity = userRepository.findByPhone(sendTo)
+          .orElseThrow(() -> new BitrubyRuntimeExpection("Неверная пара логин/пароль"));
+    } else {
+      throw new BitrubyRuntimeExpection("Unknown Grant Type");
+    }
+    return userEntity;
   }
 }

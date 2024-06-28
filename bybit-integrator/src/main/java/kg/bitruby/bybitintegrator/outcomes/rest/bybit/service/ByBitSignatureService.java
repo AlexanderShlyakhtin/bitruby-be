@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.outcomes.rest.bybit.service;
+package kg.bitruby.bybitintegrator.outcomes.rest.bybit.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;

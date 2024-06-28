@@ -2,10 +2,7 @@ package kg.bitruby.usersapp.outcomes.kafka.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.eventDto.NotificationUserVerificationStatusChangedDto;
-import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationEventDto;
+import kg.bitruby.commonmodule.dto.eventDto.*;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.common.AppContextHolder;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +39,9 @@ public class KafkaProducerService {
 
   @Value("${bitruby.kafka.topics.notifications.user-verification-status.name}")
   private String notificationsUserVerificationStatus;
+
+  @Value("${bitruby.kafka.topics.bybit.create-sub-account.name}")
+  private String createSubAccountTopic;
 
   public void emitOtpLoginEventMessage(OtpEventDto event) {
     ProducerRecord<String, String> producerRecord = new ProducerRecord<>(
@@ -87,6 +87,16 @@ public class KafkaProducerService {
   public void emitVerificationEventMessage(VerificationEventDto event) {
     ProducerRecord<String, String> producerRecord = new ProducerRecord<>(
         verificationEvents,
+        null,
+        AppContextHolder.getContextRequestId().toString(),
+        convertObjectToJson(event)
+    );
+    kafkaTemplate.send(producerRecord);
+  }
+
+  public void emitCreateSubAccountMessage(CreateSubAccountDto event) {
+    ProducerRecord<String, String> producerRecord = new ProducerRecord<>(
+        createSubAccountTopic,
         null,
         AppContextHolder.getContextRequestId().toString(),
         convertObjectToJson(event)
