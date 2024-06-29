@@ -29,3 +29,8 @@ management:
       exposure:
         include: '*'
 
+bitruby:
+  auth:
+    client-id: ''
+    client-secret: ''
+

@@ -8,7 +8,7 @@ server:
     include-binding-errors: always
   ssl:
     key-store: classpath:keystore.p12
-    key-store-password: password
+    key-store-password:
     key-store-type: PKCS12
     key-alias: bitruby
 
@@ -20,8 +20,8 @@ spring:
     liquibase-schema: users
   datasource:
     url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=users
-    username: user
-    password: password
+    username:
+    password:
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
@@ -67,8 +67,8 @@ bitruby:
     url: http://auth-server:9000/auth/api/v1
   verification:
     active: true
-    secret-key: c3198047-7f8a-4f90-a6fe-1e4b22bc487b
-    api-key: afee4a07-dd80-49d0-ba25-71580654fe9a
+    secret-key:
+    api-key:
     callback-url: 'https://webhook.cool/at/quaint-shampoo-70'
     url: 'https://stationapi.veriff.com/v1'
   kafka:

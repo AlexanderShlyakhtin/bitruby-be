@@ -1,5 +1,6 @@
 package kg.bitruby.authserver.config.customGrantTypes.phonePassword;
 
+import kg.bitruby.authserver.api.model.GrantType;
 import kg.bitruby.authserver.config.model.CustomPasswordUser;
 import kg.bitruby.authserver.service.CustomUserDetails;
 import kg.bitruby.authserver.service.OtpService;
@@ -102,13 +103,13 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
         .principal(clientPrincipal)
         .authorizationServerContext(AuthorizationServerContextHolder.getContext())
         .authorizedScopes(authorizedScopes)
-        .authorizationGrantType(new AuthorizationGrantType("phone_password"))
+        .authorizationGrantType(new AuthorizationGrantType(GrantType.PHONE_PASSWORD.getValue()))
         .authorizationGrant(customPasswordAuthenticationToken);
 
     OAuth2Authorization.Builder authorizationBuilder = OAuth2Authorization.withRegisteredClient(registeredClient)
         .attribute(Principal.class.getName(), clientPrincipal)
         .principalName(clientPrincipal.getName())
-        .authorizationGrantType(new AuthorizationGrantType("phone_password"))
+        .authorizationGrantType(new AuthorizationGrantType(GrantType.PHONE_PASSWORD.getValue()))
         .authorizedScopes(authorizedScopes);
 
     //-----------ACCESS TOKEN----------

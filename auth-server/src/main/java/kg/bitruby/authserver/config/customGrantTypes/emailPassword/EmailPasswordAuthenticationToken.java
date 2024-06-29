@@ -1,5 +1,6 @@
 package kg.bitruby.authserver.config.customGrantTypes.emailPassword;
 
+import kg.bitruby.authserver.api.model.GrantType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -20,7 +21,7 @@ public class EmailPasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
 
   public EmailPasswordAuthenticationToken(Authentication clientPrincipal,
       @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters, String otp) {
-    super(new AuthorizationGrantType("email_password"), clientPrincipal, additionalParameters);
+    super(new AuthorizationGrantType(GrantType.EMAIL_PASSWORD.getValue()), clientPrincipal, additionalParameters);
     this.username = (String) additionalParameters.get("username");
     this.password = (String) additionalParameters.get("password");
     this.otp = (String) additionalParameters.get("otp");

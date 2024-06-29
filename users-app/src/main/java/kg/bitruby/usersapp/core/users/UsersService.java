@@ -1,5 +1,6 @@
 package kg.bitruby.usersapp.core.users;
 
+import kg.bitruby.commonmodule.dto.eventDto.CreateSubAccountDto;
 import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionDto;
 import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionStatus;
 import kg.bitruby.commonmodule.dto.eventDto.VerificationEventDto;
@@ -13,6 +14,7 @@ import kg.bitruby.usersapp.common.AppContextHolder;
 import kg.bitruby.usersapp.core.event.NewUserRegistrationEvent;
 import kg.bitruby.usersapp.core.event.UserCompleteRegistrationEvent;
 import kg.bitruby.usersapp.core.event.UserVerificationDecisionEvent;
+import kg.bitruby.usersapp.outcomes.kafka.service.KafkaProducerService;
 import kg.bitruby.usersapp.outcomes.postgres.domain.*;
 import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
@@ -44,6 +46,7 @@ public class UsersService {
   private final OtpRegistrationTokenRepository otpTokenRepository;
   private final UsersVerificationSessionsRepository verificationSessionsRepository;
   private final VeriffApiClient veriffApiClient;
+  private final KafkaProducerService kafkaProducerService;
 
   @Value("${bitruby.verification.callback-url}")
   private String callbackUrl;
@@ -127,23 +130,24 @@ public class UsersService {
 
   }
 
-  @Transactional
   public void handleVerificationDecision(VerificationDecisionDto event) {
     UserEntity userEntity = findUserById(event.getUserId());
     UsersVerificationSessions verificationSessions =
         verificationSessionsRepository.findById(AppContextHolder.getContextRequestId()).orElseThrow(
             () -> new BitrubyRuntimeExpection(
-                String.format("User verifiaction session with id: %s not found ",
+                String.format("User verification session with id: %s not found ",
                     AppContextHolder.getContextRequestId())));
     switch (event.getStatus()) {
       case APPROVED -> {
         userEntity.setVerified(true);
         userRepository.save(userEntity);
-
         verificationSessions.setActive(false);
         verificationSessionsRepository.save(verificationSessions);
         verificationSessions.setStatus(VerificationSessionStatus.SUCCESS);
         verificationSessions.setUpdated(OffsetDateTime.now());
+
+        kafkaProducerService.emitCreateSubAccountMessage(CreateSubAccountDto.builder()
+                .userId(userEntity.getId()).build());
         publisher.publishEvent(new UserVerificationDecisionEvent(userEntity, VerificationDecisionStatus.APPROVED));
 
       }

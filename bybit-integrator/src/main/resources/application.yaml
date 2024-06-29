@@ -6,11 +6,6 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-  ssl:
-    key-store: classpath:keystore.p12
-    key-store-password: password
-    key-store-type: PKCS12
-    key-alias: bitruby
 
 spring:
   application:
@@ -20,13 +15,13 @@ spring:
     liquibase-schema: bybit
   datasource:
     url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=bybit
-    username: user
-    password: password
+    username:
+    password:
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
       hibernate:
-        default_schema: users
+        default_schema: bybit
     show-sql: true
     hibernate:
       ddl-auto: validate
@@ -54,8 +49,6 @@ logging:
         transaction: trace
         listener:
           KafkaMessageListenerContainer: error
-
-
 management:
   endpoints:
     web:
@@ -67,10 +60,10 @@ bitruby:
     url: http://auth-server:9000/auth/api/v1
   bybit:
     active: true
-    bybit-api-secret: ''
-    bybit-api-key: ''
+    bybit-api-secret:
+    bybit-api-key:
     recvWindow: 50000
-    url: ''
+    url: https://api-testnet.bybit.com
   kafka:
     topics:
       bybit:

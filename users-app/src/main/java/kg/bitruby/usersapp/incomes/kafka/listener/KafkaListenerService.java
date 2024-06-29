@@ -12,6 +12,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class KafkaListenerService {
   private final UsersService usersService;
 
   @KafkaListener(topics = "#{kafkaConsumerProperties.verificationEvents}")
+  @Transactional("transactionManager")
   public void listenToVerificationEventsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);
@@ -32,6 +34,7 @@ public class KafkaListenerService {
   }
 
   @KafkaListener(topics = "#{kafkaConsumerProperties.verificationDecisions}")
+  @Transactional("transactionManager")
   public void listenToVerificationDecisionsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);

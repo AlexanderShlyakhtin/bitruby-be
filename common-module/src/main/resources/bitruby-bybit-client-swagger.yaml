@@ -149,11 +149,16 @@ components:
           type: object
         time:
           type: integer
+          format: int64
     CreateSubMember:
       type: object
       required:
         - username
         - memberType
+        - password
+        - switch
+        - isUta
+        - note
       properties:
         username:
           type: string
@@ -182,10 +187,11 @@ components:
           default: 0
         isUta:
           type: boolean
+          default: true
           description: Indicates if the account is a UTA account.
         note:
           type: string
-          description: Remark for the new sub-user.
+          description: Remark for the new sub-user. UUID user
     CreateSubApiRequest:
       type: object
       required:

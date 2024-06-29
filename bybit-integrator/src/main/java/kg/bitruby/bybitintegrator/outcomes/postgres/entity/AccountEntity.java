@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", schema = "bybit")
 @Setter
 @Getter
 public class AccountEntity {
@@ -28,7 +28,7 @@ public class AccountEntity {
   @Column(name = "password", length = 30)
   private String password;
 
-  @Column(name = "memberType", nullable = false)
+  @Column(name = "member_type", nullable = false)
   private Integer memberType;
 
   @Column(name = "switch", nullable = false)

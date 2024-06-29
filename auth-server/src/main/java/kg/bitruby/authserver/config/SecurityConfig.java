@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import kg.bitruby.authserver.api.model.GrantType;
 import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationConverter;
 import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationProvider;
 import kg.bitruby.authserver.config.customGrantTypes.emailPassword.EmailPasswordAuthenticationToken;
@@ -13,7 +14,9 @@ import kg.bitruby.authserver.config.customGrantTypes.phonePassword.PhonePassword
 import kg.bitruby.authserver.config.model.CustomPasswordUser;
 import kg.bitruby.authserver.entity.UserEntity;
 import kg.bitruby.authserver.service.UserInfoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -57,16 +60,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import static kg.bitruby.authserver.api.model.GrantType.EMAIL_PASSWORD;
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.REFRESH_TOKEN;
 
 
 @Configuration
+@RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
 
-  @Autowired
-  private UserInfoService userInfoService;
+  @Value("${bitruby.auth.client-id}")
+  private String clientId;
 
+  @Value("${bitruby.auth.client-secret}")
+  private String clientSecret;
+
+  private final UserInfoService userInfoService;
 
   @Bean
   @Order(1)
@@ -113,11 +123,11 @@ public class SecurityConfig {
   }
 
   private Consumer<List<AuthenticationConverter>> getConverters() {
-    return a -> a.forEach(System.out::println);
+    return a -> a.forEach(authenticationConverter -> log.info("Converters: {}",authenticationConverter.toString()));
   }
 
   private Consumer<List<AuthenticationProvider>> getProviders() {
-    return a -> a.forEach(System.out::println);
+    return a -> a.forEach(authenticationConverter -> log.info("Provider: {}", authenticationConverter.toString()));
   }
 
   @Bean
@@ -128,8 +138,8 @@ public class SecurityConfig {
   @Bean
   public RegisteredClientRepository registeredClientRepository() {
     RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-        .clientId("client")
-        .clientSecret(passwordEncoder().encode("secret"))
+        .clientId(clientId)
+        .clientSecret(passwordEncoder().encode(clientSecret))
         .scope(OidcScopes.PROFILE)
         .scope(OidcScopes.OPENID)
         .scope(OidcScopes.EMAIL)
@@ -137,8 +147,8 @@ public class SecurityConfig {
         .redirectUri("http://127.0.0.1:4200")
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationGrantType(REFRESH_TOKEN)
-        .authorizationGrantType(new AuthorizationGrantType("email_password"))
-        .authorizationGrantType(new AuthorizationGrantType("phone_password"))
+        .authorizationGrantType(new AuthorizationGrantType(EMAIL_PASSWORD.getValue()))
+        .authorizationGrantType(new AuthorizationGrantType(GrantType.PHONE_PASSWORD.getValue()))
         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
@@ -199,18 +209,18 @@ public class SecurityConfig {
     String grantType = context.getAuthorizationGrantType().getValue();
     UserEntity userInfo;
 
-    switch (grantType) {
-      case "email_password":
+    switch (GrantType.fromValue(grantType)) {
+      case EMAIL_PASSWORD:
         EmailPasswordAuthenticationToken emailAuth = (EmailPasswordAuthenticationToken) context.getAuthorizationGrant();
         userInfo = userInfoService.getUserInfoByEmail(emailAuth.getUsername());
         break;
 
-      case "phone_password":
+      case PHONE_PASSWORD:
         PhonePasswordAuthenticationToken phoneAuth = (PhonePasswordAuthenticationToken) context.getAuthorizationGrant();
         userInfo = userInfoService.getUserInfoByPhone(phoneAuth.getUsername());
         break;
 
-      case "refresh_token":
+      case REFRESH_TOKEN:
         OAuth2RefreshTokenAuthenticationToken refreshAuth = (OAuth2RefreshTokenAuthenticationToken) context.getAuthorizationGrant();
         OAuth2Authorization authorization = authorizationService().findByToken(refreshAuth.getRefreshToken(), OAuth2TokenType.REFRESH_TOKEN);
         if (authorization == null) {
@@ -230,10 +240,10 @@ public class SecurityConfig {
     CustomPasswordUser details = (CustomPasswordUser) token.getDetails();
     String grantType = authorization.getAuthorizationGrantType().getValue();
 
-    switch (grantType) {
-      case "phone_password":
+    switch (GrantType.fromValue(grantType)) {
+      case PHONE_PASSWORD:
         return userInfoService.getUserInfoByPhone(details.username());
-      case "email_password":
+      case EMAIL_PASSWORD:
         return userInfoService.getUserInfoByEmail(details.username());
       default:
         throw new OAuth2AuthenticationException("Unsupported grant type");
@@ -247,10 +257,12 @@ public class SecurityConfig {
       return "100";
     } else if (!userInfo.isVerified() && !userInfo.isBybitAccountCreated() && !userInfo.isRegistrationComplete() ) {
       return "0";
-    }  else if (userInfo.isVerified() && userInfo.isBybitAccountCreated() && !userInfo.isRegistrationComplete()) {
+    }  else if (userInfo.isVerified() && !userInfo.isRegistrationComplete()) {
       return "1";
-    } else if (userInfo.isRegistrationComplete()) {
+    } else if (userInfo.isBybitAccountCreated() && !userInfo.isRegistrationComplete()) {
       return "2";
+    } else if (userInfo.isRegistrationComplete()) {
+      return "3";
     } else {
       throw new OAuth2AuthenticationException("Illegal account status");
     }

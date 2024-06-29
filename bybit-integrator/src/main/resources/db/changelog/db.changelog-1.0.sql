@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS bybit.accounts
     bybit_uid  VARCHAR     NOT NULL UNIQUE,
     username   VARCHAR(16) NOT NULL UNIQUE,
     password   VARCHAR(30) NOT NULL,
-    memberType INTEGER     NOT NULL,
+    member_type INTEGER     NOT NULL,
     switch     INTEGER     NOT NULL,
     is_Uta     BOOLEAN     NOT NULL,
     is_active  BOOLEAN     NOT NULL

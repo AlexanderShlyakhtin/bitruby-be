@@ -1,6 +1,7 @@
 package kg.bitruby.authserver.config.customGrantTypes.emailPassword;
 
 import jakarta.servlet.http.HttpServletRequest;
+import kg.bitruby.authserver.api.model.GrantType;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +23,7 @@ public class EmailPasswordAuthenticationConverter implements AuthenticationConve
 
     String grantType = request.getParameter(OAuth2ParameterNames.GRANT_TYPE);
 
-    if (!"email_password".equals(grantType)) {
+    if (!GrantType.EMAIL_PASSWORD.getValue().equals(grantType)) {
       return null;
     }
 

@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.function.Supplier;
 
 
@@ -35,7 +34,6 @@ public class ByBitApiClient {
 
   public CreateSubApiResult createSubAccountApiKey(CreateSubApiRequest createSubApiRequest) {
     if(Boolean.TRUE.equals(active)) {
-      OffsetDateTime.now().toInstant().getEpochSecond();
       long epochMilli = System.currentTimeMillis();
       return safeCall( () ->  accountApi.createSubAccountApiKey(byBitSignatureService.signPost(createSubApiRequest, epochMilli), apiKey,
           epochMilli, recvWindow, createSubApiRequest));
@@ -47,10 +45,9 @@ public class ByBitApiClient {
   public CreateSubAccountResult createSubAccount(CreateSubMember createSubMember) {
     if(Boolean.TRUE.equals(active)) {
       long epochMilli = System.currentTimeMillis();
-      CreateSubAccountResult result = safeCall(() -> accountApi.createSubAccount(
+      return safeCall(() -> accountApi.createSubAccount(
           byBitSignatureService.signPost(createSubMember, epochMilli), apiKey, epochMilli,
           recvWindow, createSubMember));
-      return result;
     } else {
       return new CreateSubAccountResult();
     }
@@ -70,7 +67,7 @@ public class ByBitApiClient {
       } catch (Exception e) {
         throw new BitrubyRuntimeExpection(
             String.format(
-                "Error. Can't process request to Veriff server. Error message: %s",
+                "Error. Can't process request to ByBit server. Error message: %s",
                 e.getMessage()),
             e);
       }
