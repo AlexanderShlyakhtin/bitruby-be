@@ -1,4 +1,4 @@
-package kg.bitruby.authserver.config.customGrantTypes.phonePassword;
+package kg.bitruby.authserver.config.granttypes.phone_password;
 
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;

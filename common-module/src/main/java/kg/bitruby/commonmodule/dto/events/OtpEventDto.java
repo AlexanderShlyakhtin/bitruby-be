@@ -1,4 +1,4 @@
-package kg.bitruby.commonmodule.dto.eventDto;
+package kg.bitruby.commonmodule.dto.events;
 
 import kg.bitruby.usersapp.api.model.GrantType;
 import lombok.*;

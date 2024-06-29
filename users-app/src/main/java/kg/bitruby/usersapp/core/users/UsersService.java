@@ -1,9 +1,9 @@
 package kg.bitruby.usersapp.core.users;
 
-import kg.bitruby.commonmodule.dto.eventDto.CreateSubAccountDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionStatus;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationEventDto;
+import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionDto;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionStatus;
+import kg.bitruby.commonmodule.dto.events.VerificationEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.api.model.*;
 import kg.bitruby.usersapp.client.veriff.api.model.NewSession;
@@ -19,7 +19,7 @@ import kg.bitruby.usersapp.outcomes.postgres.domain.*;
 import kg.bitruby.usersapp.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.UserRepository;
 import kg.bitruby.usersapp.outcomes.postgres.repository.UsersVerificationSessionsRepository;
-import kg.bitruby.usersapp.outcomes.rest.veriffClient.api.VeriffApiClient;
+import kg.bitruby.usersapp.outcomes.rest.veriff.api.VeriffApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullable;

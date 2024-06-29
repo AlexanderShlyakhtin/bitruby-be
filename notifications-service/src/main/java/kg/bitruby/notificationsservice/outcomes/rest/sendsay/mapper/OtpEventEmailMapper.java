@@ -1,6 +1,6 @@
 package kg.bitruby.notificationsservice.outcomes.rest.sendsay.mapper;
 
-import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
+import kg.bitruby.commonmodule.dto.events.OtpEventDto;
 import kg.bitruby.notificationsservice.client.sendsay.api.model.Letter;
 import kg.bitruby.notificationsservice.client.sendsay.api.model.LetterMessage;
 import kg.bitruby.notificationsservice.client.sendsay.api.model.SendEmail;

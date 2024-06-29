@@ -1,4 +1,4 @@
-package kg.bitruby.authserver.config.customGrantTypes.phonePassword;
+package kg.bitruby.authserver.config.granttypes.phone_password;
 
 import kg.bitruby.authserver.api.model.GrantType;
 import kg.bitruby.authserver.config.model.CustomPasswordUser;

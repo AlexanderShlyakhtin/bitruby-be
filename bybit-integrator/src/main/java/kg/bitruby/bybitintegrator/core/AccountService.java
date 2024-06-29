@@ -5,7 +5,7 @@ import kg.bitruby.bybitintegrator.outcomes.postgres.entity.AccountEntity;
 import kg.bitruby.bybitintegrator.outcomes.postgres.repository.AccountRepository;
 import kg.bitruby.bybitintegrator.outcomes.rest.bybit.api.ByBitApiClient;
 import kg.bitruby.bybitintegrator.outcomes.rest.bybit.service.ByBitMapperService;
-import kg.bitruby.commonmodule.dto.eventDto.CreateSubAccountDto;
+import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubAccountResult;
 import kg.bitruby.usersapp.client.bybit.api.model.CreateSubMember;
 import lombok.RequiredArgsConstructor;

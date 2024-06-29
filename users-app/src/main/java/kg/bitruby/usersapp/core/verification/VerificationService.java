@@ -1,9 +1,9 @@
 package kg.bitruby.usersapp.core.verification;
 
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionStatus;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationEventAction;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationEventDto;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionDto;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionStatus;
+import kg.bitruby.commonmodule.dto.events.VerificationEventAction;
+import kg.bitruby.commonmodule.dto.events.VerificationEventDto;
 import kg.bitruby.usersapp.api.model.Base;
 import kg.bitruby.usersapp.api.model.VerificationDecision;
 import kg.bitruby.usersapp.api.model.VerificationEvent;

@@ -3,7 +3,7 @@ package kg.bitruby.bybitintegrator.incomes.kafka.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.bybitintegrator.common.AppContextHolder;
 import kg.bitruby.bybitintegrator.core.AccountService;
-import kg.bitruby.commonmodule.dto.eventDto.CreateSubAccountDto;
+import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

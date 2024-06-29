@@ -1,6 +1,6 @@
 package kg.bitruby.usersapp.core.event;
 
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionStatus;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionStatus;
 import kg.bitruby.usersapp.outcomes.postgres.domain.UserEntity;
 import lombok.Getter;
 import lombok.Setter;

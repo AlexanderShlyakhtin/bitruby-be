@@ -1,4 +1,4 @@
-package kg.bitruby.authserver.config.customGrantTypes.emailPassword;
+package kg.bitruby.authserver.config.granttypes.email_password;
 
 import kg.bitruby.authserver.api.model.GrantType;
 import kg.bitruby.authserver.config.model.CustomPasswordUser;

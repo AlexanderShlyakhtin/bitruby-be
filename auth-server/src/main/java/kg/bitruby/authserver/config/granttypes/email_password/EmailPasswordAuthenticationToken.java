@@ -1,4 +1,4 @@
-package kg.bitruby.authserver.config.customGrantTypes.phonePassword;
+package kg.bitruby.authserver.config.granttypes.email_password;
 
 import kg.bitruby.authserver.api.model.GrantType;
 import org.springframework.lang.Nullable;
@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class PhonePasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
+public class EmailPasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
   private static final long serialVersionUID = 1L;
   private final String username;
@@ -19,9 +19,9 @@ public class PhonePasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
   private final Set<String> scopes;
   private final String otp;
 
-  public PhonePasswordAuthenticationToken(Authentication clientPrincipal,
+  public EmailPasswordAuthenticationToken(Authentication clientPrincipal,
       @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters, String otp) {
-    super(new AuthorizationGrantType(GrantType.PHONE_PASSWORD.getValue()), clientPrincipal, additionalParameters);
+    super(new AuthorizationGrantType(GrantType.EMAIL_PASSWORD.getValue()), clientPrincipal, additionalParameters);
     this.username = (String) additionalParameters.get("username");
     this.password = (String) additionalParameters.get("password");
     this.otp = (String) additionalParameters.get("otp");

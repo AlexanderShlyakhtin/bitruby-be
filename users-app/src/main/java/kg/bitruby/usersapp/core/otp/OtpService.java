@@ -1,6 +1,6 @@
 package kg.bitruby.usersapp.core.otp;
 
-import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
+import kg.bitruby.commonmodule.dto.events.OtpEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.api.model.*;
 import kg.bitruby.usersapp.outcomes.kafka.service.KafkaProducerService;

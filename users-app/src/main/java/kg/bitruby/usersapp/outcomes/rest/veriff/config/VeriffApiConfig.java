@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.outcomes.rest.veriffClient.config;
+package kg.bitruby.usersapp.outcomes.rest.veriff.config;
 
 import kg.bitruby.usersapp.client.veriff.api.VerificationApi;
 import kg.bitruby.usersapp.client.veriff.api.invoker.ApiClient;

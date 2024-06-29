@@ -1,4 +1,4 @@
-package kg.bitruby.commonmodule.dto.eventDto;
+package kg.bitruby.commonmodule.dto.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

@@ -2,7 +2,7 @@ package kg.bitruby.usersapp.outcomes.kafka.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.eventDto.*;
+import kg.bitruby.commonmodule.dto.events.*;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.common.AppContextHolder;
 import lombok.RequiredArgsConstructor;

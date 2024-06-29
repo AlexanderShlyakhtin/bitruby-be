@@ -1,8 +1,8 @@
 package kg.bitruby.usersapp.incomes.kafka.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationDecisionDto;
-import kg.bitruby.commonmodule.dto.eventDto.VerificationEventDto;
+import kg.bitruby.commonmodule.dto.events.VerificationDecisionDto;
+import kg.bitruby.commonmodule.dto.events.VerificationEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.common.AppContextHolder;
 import kg.bitruby.usersapp.core.users.UsersService;

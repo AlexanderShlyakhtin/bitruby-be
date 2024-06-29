@@ -1,6 +1,6 @@
 package kg.bitruby.notificationsservice.core;
 
-import kg.bitruby.commonmodule.dto.eventDto.OtpEventDto;
+import kg.bitruby.commonmodule.dto.events.OtpEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.notificationsservice.client.sendsay.api.model.SendEmailResult;
 import kg.bitruby.notificationsservice.client.smstraffic.api.model.Reply;

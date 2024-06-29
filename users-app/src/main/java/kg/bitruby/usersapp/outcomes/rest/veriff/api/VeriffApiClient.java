@@ -1,4 +1,4 @@
-package kg.bitruby.usersapp.outcomes.rest.veriffClient.api;
+package kg.bitruby.usersapp.outcomes.rest.veriff.api;
 
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersapp.client.veriff.api.VerificationApi;

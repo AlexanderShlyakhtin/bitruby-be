@@ -1,4 +1,4 @@
-package kg.bitruby.authserver.config.customGrantTypes.phonePassword;
+package kg.bitruby.authserver.config.granttypes.phone_password;
 
 import jakarta.servlet.http.HttpServletRequest;
 import kg.bitruby.authserver.api.model.GrantType;
