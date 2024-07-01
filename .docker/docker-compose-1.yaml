@@ -1,8 +1,4 @@
-version: '3.8'
-
-networks:
-  bitruby_net:
-    driver: bridge
+version: '2'
 
 services:
   bitruby-zookeeper:
@@ -12,8 +8,6 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 22181:2181
-    networks:
-      - bitruby_net
     container_name: bitruby-zookeeper
 
   bitruby-kafka:
@@ -29,8 +23,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - bitruby_net
+
     container_name: bitruby-kafka
 
   bitruby-postgres:
@@ -41,16 +34,12 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: bitruby
-    networks:
-      - bitruby_net
     container_name: bitruby-postgres
 
   bitruby-redis:
     image: redis:latest
     ports:
       - 6379:6379
-    networks:
-      - bitruby_net
     container_name: bitruby-redis
 
   bitruby-fe-angular:
@@ -73,17 +62,14 @@ services:
       SERVER_SSL_KEY_STORE_PASSWORD: ${SERVER_SSL_KEY_STORE_PASSWORD}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      SERVER_ADDRESS: 0.0.0.0
       BITRUBY_VERIFICATION_SECRET_KEY: ${BITRUBY_VERIFICATION_SECRET_KEY}
       BITRUBY_VERIFICATION_API_KEY: ${BITRUBY_VERIFICATION_API_KEY}
       BITRUBY_VERIFICATION_CALLBACK_URL: 'https://webhook.cool/at/quaint-shampoo-70'
       BITRUBY_VERIFICATION_URL: 'https://stationapi.veriff.com/v1'
-    networks:
-      - bitruby_net
     container_name: bitruby-users-app
 
   bitruby-auth-server:
-    image: alexandershlyakhtin/auth-server:0.0.2
+    image: alexandershlyakhtin/auth-server:0.0.1
     ports:
       - 9000:9000
     depends_on:
@@ -93,9 +79,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://bitruby-postgres:5432/bitruby?currentSchema=users
       BITRUBY_AUTH_CLIENT_ID: ${BITRUBY_AUTH_CLIENT_ID}
       BITRUBY_AUTH_CLIENT_SECRET: ${BITRUBY_AUTH_CLIENT_SECRET}
-      SERVER_ADDRESS: 0.0.0.0
-    networks:
-      - bitruby_net
     container_name: bitruby-auth-server
 
   bitruby-bybit-integrator:
@@ -114,9 +97,6 @@ services:
       SPRING_DATA_REDIS_HOST: bitruby-redis
       BITRUBY_BYBIT_BYBIT_API_SECRET: ${BITRUBY_BYBIT_BYBIT_API_SECRET}
       BITRUBY_BYBIT_BYBIT_API_KEY: ${BITRUBY_BYBIT_BYBIT_API_KEY}
-      SERVER_ADDRESS: 0.0.0.0
-    networks:
-      - bitruby_net
     container_name: bitruby-bybit-integrator
 
   bitruby-notifications-service:
@@ -130,7 +110,4 @@ services:
       BITRUBY_SMSTRIFFIC_PASSWORD: ${BITRUBY_SMSTRIFFIC_PASSWORD}
       BITRUBY_SENDSAY_APIKEY: ${BITRUBY_SENDSAY_APIKEY}
       BITRUBY_SENDSAY_APILOGIN: ${BITRUBY_SENDSAY_APILOGIN}
-      SERVER_ADDRESS: 0.0.0.0
-    networks:
-      - bitruby_net
     container_name: bitruby-notifications-service
