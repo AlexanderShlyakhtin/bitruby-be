@@ -53,6 +53,12 @@ services:
       - bitruby_net
     container_name: bitruby-redis
 
+  bitruby-fe-angular:
+    image: alexandershlyakhtin/fe-angular:0.0.1
+    ports:
+      - 4200:4200
+    container_name: bitruby-fe-angular
+
   bitruby-users-app:
     image: alexandershlyakhtin/users-app:0.0.1
     ports:
