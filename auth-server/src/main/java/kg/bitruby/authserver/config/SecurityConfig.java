@@ -101,8 +101,7 @@ public class SecurityConfig {
 
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://185.17.141.84:4200")));
-    http.cors(cors -> cors.configure(http));
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*")));
     http.exceptionHandling(e -> e
         .defaultAuthenticationEntryPointFor(
             new LoginUrlAuthenticationEntryPoint("/login"),
