@@ -2,7 +2,6 @@ package kg.bitruby.bybitintegrator.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.bybitintegrator.api.model.AccountApiKey;
-import kg.bitruby.bybitintegrator.api.model.AccountApiKeyResultPermissions;
 import kg.bitruby.bybitintegrator.common.util.StrongPasswordGenerator;
 import kg.bitruby.bybitintegrator.outcomes.postgres.entity.AccountEntity;
 import kg.bitruby.bybitintegrator.outcomes.postgres.repository.AccountRepository;
@@ -83,7 +82,7 @@ public class AccountService {
           accountApiKeyEntity.setNote(result.getNote());
           accountApiKeyEntity.setReadOnly(result.getReadOnly());
           accountApiKeyEntity.setPermissions(convertObject(result.getPermissions(),
-              AccountApiKeyResultPermissions.class));
+              CreateSubApiResultResultPermissions.class));
           accountApiKeyRepository.save(accountApiKeyEntity);
 
           return convertObject(subAccountApiKey, AccountApiKey.class);

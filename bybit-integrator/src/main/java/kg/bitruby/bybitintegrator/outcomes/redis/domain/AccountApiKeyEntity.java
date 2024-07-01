@@ -2,7 +2,7 @@ package kg.bitruby.bybitintegrator.outcomes.redis.domain;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import kg.bitruby.bybitintegrator.api.model.AccountApiKeyResultPermissions;
+import kg.bitruby.usersapp.client.bybit.api.model.CreateSubApiResultResultPermissions;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,5 +29,5 @@ public class AccountApiKeyEntity {
   private String secret;
 
   @Enumerated(EnumType.STRING)
-  private AccountApiKeyResultPermissions permissions;
+  private CreateSubApiResultResultPermissions permissions;
 }
