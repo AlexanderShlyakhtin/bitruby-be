@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Bitruby ByBit Integrator service API
+  description: API for Bitruby ByBit Integrator
+  version: 1.0.0
+servers:
+  - url: /api/v1/
+
+tags:
+  - name: account
+    description: >-
+      User Management and API Key Management
+
+paths:
+  /account/{id}/api-key:
+    get:
+      summary: Get Account API key
+      description: Get User Account API key.
+      operationId: getApiKeySubAccount
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      tags:
+        - account
+      responses:
+        '200':
+          $ref: '#/components/responses/GetAccountApiKeyResponse'
+        '4XX':
+          $ref: '#/components/responses/Error'
+        '5XX':
+          $ref: '#/components/responses/Error'
+components:
+  responses:
+    Error:
+      description: Successfully created sub-user API key.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    GetAccountApiKeyResponse:
+      description: Get Account API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccountApiKey'
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    XBAPISIGN:
+      name: X-BAPI-SIGN
+      in: header
+      required: true
+      schema:
+        type: string
+    XBAPIAPIKEY:
+      name: X-BAPI-API-KEY
+      in: header
+      required: true
+      schema:
+        type: string
+    XBAPITIMESTAMP:
+      name: X-BAPI-TIMESTAMP
+      in: header
+      required: true
+      schema:
+        type: integer
+        format: int64
+    XBAPIRECVWINDOW:
+      name: X-BAPI-RECV-WINDOW
+      in: header
+      required: true
+      schema:
+        type: integer
+        format: int64
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
+    AccountApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+        note:
+          type: string
+        apiKey:
+          type: string
+        readOnly:
+          type: integer
+        secret:
+          type: string
+        permissions:
+          type: object
+          properties:
+            ContractTrade:
+              type: array
+              items:
+                type: string
+            Spot:
+              type: array
+              items:
+                type: string
+            Wallet:
+              type: array
+              items:
+                type: string
+            Options:
+              type: array
+              items:
+                type: string
+            CopyTrading:
+              type: array
+              items:
+                type: string
+            BlockTrade:
+              type: array
+              items:
+                type: string
+            Exchange:
+              type: array
+              items:
+                type: string
+            NFT:
+              type: array
+              items:
+                type: string

@@ -226,6 +226,24 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-bybit-integrator-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/bitruby-bybit-integrator-api-swagger.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>kg.bitruby.bybitintegrator.api</apiPackage>
+                            <modelPackage>kg.bitruby.bybitintegrator.api.model</modelPackage>
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
+                            <configOptions>
+                                <legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>
+                                <useTags>true</useTags>
+                                <delegatePattern>true</delegatePattern>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

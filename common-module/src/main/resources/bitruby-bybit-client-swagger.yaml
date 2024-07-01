@@ -288,22 +288,28 @@ components:
                   type: array
                   items:
                     type: string
+                    enum:
+                      - Order
+                      - Position
                 Spot:
                   type: array
                   items:
                     type: string
+                    enum:
+                      - SpotTrade
                 Wallet:
                   type: array
                   items:
                     type: string
+                    enum:
+                      - AccountTransfer
+                      - SubMemberTransferList
                 Options:
                   type: array
                   items:
                     type: string
-                CopyTrading:
-                  type: array
-                  items:
-                    type: string
+                    enum:
+                      - OptionsTrade
                 BlockTrade:
                   type: array
                   items:
@@ -312,6 +318,14 @@ components:
                   type: array
                   items:
                     type: string
+                    enum:
+                      - ExchangeHistory
+                CopyTrading:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - CopyTrading
                 NFT:
                   type: array
                   items:
