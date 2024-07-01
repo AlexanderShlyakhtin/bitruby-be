@@ -15,8 +15,8 @@
     <name>.common-module</name>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version-openapi-generator>7.6.0</version-openapi-generator>
         <version-jackson-databind-nullable>0.2.6</version-jackson-databind-nullable>

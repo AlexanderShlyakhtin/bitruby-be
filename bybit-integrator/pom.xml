@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>bybit-integrator</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>bybit-integrator</name>
     <description>bybit-integrator</description>
 
@@ -21,7 +21,7 @@
 
     <properties>
         <version-common-module>0.0.1</version-common-module>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <version-jackson-databind-nullable>0.2.6</version-jackson-databind-nullable>
     </properties>
     <dependencies>
@@ -126,6 +126,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <name>${project.groupId}/${project.artifactId}/${project.version}</name>
+                        <env>
+                            <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                        </env>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

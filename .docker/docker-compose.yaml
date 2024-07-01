@@ -1,26 +1,39 @@
-version: '2'
+version: '3.8'
+
+networks:
+  bitruby_net:
+    driver: bridge
+
 services:
-  zookeeper:
+  bitruby-zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 22181:2181
-  kafka:
+    networks:
+      - bitruby_net
+    container_name: bitruby-zookeeper
+
+  bitruby-kafka:
     image: confluentinc/cp-kafka:7.4.4
     depends_on:
-      - zookeeper
+      - bitruby-zookeeper
     ports:
       - 29092:29092
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ZOOKEEPER_CONNECT: bitruby-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://bitruby-kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-  postres:
+    networks:
+      - bitruby_net
+    container_name: bitruby-kafka
+
+  bitruby-postgres:
     image: postgres:latest
     ports:
       - 5432:5432
@@ -28,8 +41,61 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: bitruby
-  redis:
-      image: redis:latest
-      ports:
-        - 6379:6379
+    networks:
+      - bitruby_net
+    container_name: bitruby-postgres
 
+  bitruby-redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - bitruby_net
+    container_name: bitruby-redis
+
+  bitruby-auth-server:
+    image: kg.bitruby/auth-server/0.0.1:latest
+    ports:
+      - 9000:9000
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://bitruby-postgres:5432/bitruby?currentSchema=users
+      BITRUBY_AUTH_CLIENT_ID: ${BITRUBY_AUTH_CLIENT_ID}
+      BITRUBY_AUTH_CLIENT_SECRET: ${BITRUBY_AUTH_CLIENT_SECRET}
+    networks:
+      - bitruby_net
+    container_name: bitruby-auth-server
+
+  bitruby-bybit-integrator:
+    image: kg.bitruby/bybit-integrator/0.0.1:latest
+    ports:
+      - 8082:8082
+    depends_on:
+      - bitruby-postgres
+      - bitruby-kafka
+      - bitruby-redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://bitruby-postgres:5432/bitruby?currentSchema=bybit
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: bitruby-kafka:9092
+      SPRING_DATA_REDIS_HOST: bitruby-redis
+      BITRUBY_BYBIT_BYBIT_API_SECRET: ${BITRUBY_BYBIT_BYBIT_API_SECRET}
+      BITRUBY_BYBIT_BYBIT_API_KEY: ${BITRUBY_BYBIT_BYBIT_API_KEY}
+    networks:
+      - bitruby_net
+    container_name: bitruby-bybit-integrator
+
+  bitruby-notifications-service:
+    image: kg.bitruby/notifications-service/1.0.0:latest
+    depends_on:
+      - bitruby-postgres
+      - bitruby-kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: bitruby-kafka:9092
+      BITRUBY_SMSTRIFFIC_LOGIN: ${BITRUBY_SMSTRIFFIC_LOGIN}
+      BITRUBY_SMSTRIFFIC_PASSWORD: ${BITRUBY_SMSTRIFFIC_PASSWORD}
+      BITRUBY_SENDSAY_APIKEY: ${BITRUBY_SENDSAY_APIKEY}
+      BITRUBY_SENDSAY_APILOGIN: ${BITRUBY_SENDSAY_APILOGIN}
+    networks:
+      - bitruby_net
+    container_name: bitruby-notifications-service

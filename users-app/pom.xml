@@ -17,7 +17,7 @@
     <description>users-app</description>
     <properties>
         <version-common-module>0.0.1</version-common-module>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <version-mapstruct>1.5.5.Final</version-mapstruct>
         <version-jackson-databind-nullable>0.2.6</version-jackson-databind-nullable>
     </properties>
@@ -118,6 +118,12 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <image>
+                        <name>${project.groupId}/${project.artifactId}/${project.version}</name>
+                        <env>
+                            <BP_JVM_VERSION>${java.version}</BP_JVM_VERSION>
+                        </env>
+                    </image>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
