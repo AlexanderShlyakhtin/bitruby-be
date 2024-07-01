@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>bybit-integrator</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <name>bybit-integrator</name>
     <description>bybit-integrator</description>
 
