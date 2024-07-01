@@ -53,10 +53,35 @@ services:
       - bitruby_net
     container_name: bitruby-redis
 
+  bitruby-users-app:
+    image: alexandershlyakhtin/users-app:0.0.1
+    ports:
+      - 8081:8081
+    depends_on:
+      - bitruby-postgres
+      - bitruby-kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://bitruby-postgres:5432/bitruby?currentSchema=users
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: bitruby-kafka:9092
+      BITRUBY_AUTH_URL: http://bitruby-auth-server:9000/auth/api/v1
+      SERVER_SSL_KEY_STORE_PASSWORD: ${SERVER_SSL_KEY_STORE_PASSWORD}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      BITRUBY_VERIFICATION_SECRET_KEY: ${BITRUBY_VERIFICATION_SECRET_KEY}
+      BITRUBY_VERIFICATION_API_KEY: ${BITRUBY_VERIFICATION_API_KEY}
+      BITRUBY_VERIFICATION_CALLBACK_URL: 'https://webhook.cool/at/quaint-shampoo-70'
+      BITRUBY_VERIFICATION_URL: 'https://stationapi.veriff.com/v1'
+    networks:
+      - bitruby_net
+    container_name: bitruby-users-app
+
   bitruby-auth-server:
-    image: kg.bitruby/auth-server/0.0.1:latest
+    image: alexandershlyakhtin/auth-server:0.0.1
     ports:
       - 9000:9000
+    depends_on:
+      - bitruby-users-app
+      - bitruby-postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://bitruby-postgres:5432/bitruby?currentSchema=users
       BITRUBY_AUTH_CLIENT_ID: ${BITRUBY_AUTH_CLIENT_ID}
@@ -66,7 +91,7 @@ services:
     container_name: bitruby-auth-server
 
   bitruby-bybit-integrator:
-    image: kg.bitruby/bybit-integrator/0.0.1:latest
+    image: alexandershlyakhtin/bybit-integrator:0.0.1
     ports:
       - 8082:8082
     depends_on:
@@ -86,7 +111,7 @@ services:
     container_name: bitruby-bybit-integrator
 
   bitruby-notifications-service:
-    image: kg.bitruby/notifications-service/1.0.0:latest
+    image: alexandershlyakhtin/notifications-service:1.0.0
     depends_on:
       - bitruby-postgres
       - bitruby-kafka
