@@ -27,7 +27,7 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable);
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://127.0.0.1:4200")));
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://185.17.141.84:4200")));
     return http.build();
   }
 

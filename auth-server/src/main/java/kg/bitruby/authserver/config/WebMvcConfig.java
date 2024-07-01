@@ -17,7 +17,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   public CorsFilter corsFilterBuilt() {
     CorsConfiguration corsConfig = new CorsConfiguration();
-    corsConfig.addAllowedOrigin("http://127.0.0.1:4200");
+    corsConfig.addAllowedOrigin("http://185.17.141.84:4200");
     corsConfig.addAllowedHeader("*");
     corsConfig.addAllowedHeader("authorization");
     corsConfig.addAllowedMethod("GET");

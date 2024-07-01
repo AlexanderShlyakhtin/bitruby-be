@@ -101,7 +101,7 @@ public class SecurityConfig {
 
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://127.0.0.1:4200")));
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://185.17.141.84:4200")));
     http.cors(cors -> cors.configure(http));
     http.exceptionHandling(e -> e
         .defaultAuthenticationEntryPointFor(
@@ -144,7 +144,7 @@ public class SecurityConfig {
         .scope(OidcScopes.OPENID)
         .scope(OidcScopes.EMAIL)
         .scope("offline_access")
-        .redirectUri("http://127.0.0.1:4200")
+        .redirectUri("http://185.17.141.84:4200")
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationGrantType(REFRESH_TOKEN)
         .authorizationGrantType(new AuthorizationGrantType(EMAIL_PASSWORD.getValue()))
