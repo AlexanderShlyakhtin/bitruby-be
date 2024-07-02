@@ -61,8 +61,10 @@ management:
         include: '*'
 
 bitruby:
+  frontend:
+    url: ''
   auth:
-    url: http://auth-server:9000/auth/api/v1
+    url: http://localhost:9000/auth/api/v1
   verification:
     active: true
     secret-key:

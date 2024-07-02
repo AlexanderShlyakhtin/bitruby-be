@@ -80,7 +80,7 @@ services:
     container_name: bitruby-users-app
 
   bitruby-auth-server:
-    image: alexandershlyakhtin/auth-server:0.0.2
+    image: alexandershlyakhtin/auth-server:0.0.3
     ports:
       - 9000:9000
     depends_on:

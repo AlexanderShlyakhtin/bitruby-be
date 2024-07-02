@@ -15,6 +15,9 @@ public class SecurityConfig {
   @Value("${bitruby.auth.url}")
   private String authUrl;
 
+  @Value("${bitruby.frontend.url}")
+  private String frontendUrl;
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -29,7 +32,7 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable);
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://185.17.141.84:4200")));
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", frontendUrl)));
     return http.build();
   }
 

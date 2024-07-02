@@ -28,6 +28,8 @@ management:
         include: '*'
 
 bitruby:
+  frontend:
+    url: ''
   auth:
     client-id: ''
     client-secret: ''

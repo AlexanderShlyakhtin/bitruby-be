@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.server.resource.authentication.JwtIssuerAuthenticationManagerResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 @Configuration
 public class SecurityConfig {
@@ -25,9 +24,6 @@ public class SecurityConfig {
         .oauth2ResourceServer(oauth2 -> oauth2
             .authenticationManagerResolver(new JwtIssuerAuthenticationManagerResolver(authUrl)));
     http.csrf(AbstractHttpConfigurer::disable);
-    http.headers(httpSecurityHeadersConfigurer ->
-        httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "http://185.17.141.84:4200")));
     return http.build();
   }
 

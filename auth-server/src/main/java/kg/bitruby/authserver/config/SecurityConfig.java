@@ -76,6 +76,9 @@ public class SecurityConfig {
   @Value("${bitruby.auth.client-secret}")
   private String clientSecret;
 
+  @Value("${bitruby.frontend.url}")
+  private String frontendUrl;
+
   private final UserInfoService userInfoService;
 
   @Bean
@@ -101,7 +104,7 @@ public class SecurityConfig {
 
     http.headers(httpSecurityHeadersConfigurer ->
         httpSecurityHeadersConfigurer
-            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*")));
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", frontendUrl)));
     http.exceptionHandling(e -> e
         .defaultAuthenticationEntryPointFor(
             new LoginUrlAuthenticationEntryPoint("/login"),
@@ -143,7 +146,7 @@ public class SecurityConfig {
         .scope(OidcScopes.OPENID)
         .scope(OidcScopes.EMAIL)
         .scope("offline_access")
-        .redirectUri("http://185.17.141.84:4200")
+        .redirectUri(frontendUrl)
         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
         .authorizationGrantType(REFRESH_TOKEN)
         .authorizationGrantType(new AuthorizationGrantType(EMAIL_PASSWORD.getValue()))

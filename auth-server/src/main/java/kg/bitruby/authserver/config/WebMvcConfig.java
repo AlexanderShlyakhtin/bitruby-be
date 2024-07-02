@@ -1,5 +1,6 @@
 package kg.bitruby.authserver.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -10,6 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+  @Value("${bitruby.frontend.url}")
+  private String frontendUrl;
+
   @Bean
   public CorsFilter corsFilter() {
     return corsFilterBuilt();
@@ -17,7 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
   public CorsFilter corsFilterBuilt() {
     CorsConfiguration corsConfig = new CorsConfiguration();
-    corsConfig.addAllowedOrigin("http://185.17.141.84:4200");
+    corsConfig.addAllowedOrigin(frontendUrl);
     corsConfig.addAllowedHeader("*");
     corsConfig.addAllowedHeader("authorization");
     corsConfig.addAllowedMethod("GET");
