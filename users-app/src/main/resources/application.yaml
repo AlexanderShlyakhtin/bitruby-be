@@ -21,6 +21,11 @@ spring:
     username:
     password:
     driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/auth/api/v1
   jpa:
     properties:
       hibernate:
@@ -62,7 +67,7 @@ management:
 
 bitruby:
   frontend:
-    url: ''
+    url: http://localhost:4200
   auth:
     url: http://localhost:9000/auth/api/v1
   verification:
