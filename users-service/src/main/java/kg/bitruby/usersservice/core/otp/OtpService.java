@@ -1,17 +1,18 @@
 package kg.bitruby.usersservice.core.otp;
 
+import kg.bitruby.commonmodule.domain.AccountStatus;
 import kg.bitruby.commonmodule.dto.events.OtpEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.api.model.*;
 import kg.bitruby.usersservice.outcomes.kafka.service.KafkaProducerService;
-import kg.bitruby.usersservice.outcomes.postgres.domain.OtpLoginTokenEntity;
-import kg.bitruby.usersservice.outcomes.postgres.domain.OtpRegistrationTokenEntity;
-import kg.bitruby.usersservice.outcomes.postgres.domain.OtpRestorePasswordTokenEntity;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UserEntity;
-import kg.bitruby.usersservice.outcomes.postgres.repository.OtpLoginTokenRepository;
-import kg.bitruby.usersservice.outcomes.postgres.repository.OtpRegistrationTokenRepository;
-import kg.bitruby.usersservice.outcomes.postgres.repository.OtpRestorePasswordTokenEntityRepository;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UserRepository;
+import kg.bitruby.usersservice.outcomes.redis.domain.OtpLogin;
+import kg.bitruby.usersservice.outcomes.redis.domain.OtpRegistration;
+import kg.bitruby.usersservice.outcomes.redis.domain.OtpRestorePassword;
+import kg.bitruby.usersservice.outcomes.redis.repository.OtpLoginRepository;
+import kg.bitruby.usersservice.outcomes.redis.repository.OtpRegistrationRepository;
+import kg.bitruby.usersservice.outcomes.redis.repository.OtpRestorePasswordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,91 +21,98 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
+
+import static kg.bitruby.commonmodule.constants.AppConstants.TOKEN_NOT_VALID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OtpService {
-  private final OtpRestorePasswordTokenEntityRepository otpRestorePasswordTokenEntityRepository;
-  private final OtpRegistrationTokenRepository otpRegistrationTokenEntityRepository;
+  private final OtpRestorePasswordRepository otpRestorePasswordRepository;
+  private final OtpRegistrationRepository otpRegistrationRepository;
   private final UserRepository userRepository;
-  private final OtpLoginTokenRepository otpLoginTokenRepository;
+  private final OtpLoginRepository otpLoginRepository;
   private final PasswordEncoder passwordEncoder;
   private final KafkaProducerService kafkaProducerService;
 
   private static final String CHARACTERS = "0123456789";
+  private static final int EXPIRATION_TIME = 30;
+
   private static final Random RANDOM = new SecureRandom();
 
   @Transactional(transactionManager = "transactionManager")
-  public Base generateOtpCodeForLogin(OtpCodeLogin otpCode) {
+  public GenerateOtpCodeLoginResult generateOtpCodeForLogin(OtpCodeLogin otpCode) {
     UserEntity userEntity;
     String sendTo = otpCode.getSendTo();
-    userEntity = checkUserWithTokenAndReturn(GrantType.EMAIL_PASSWORD, sendTo);
+    userEntity = checkUserWithTokenAndReturn(otpCode.getGrantType(), sendTo);
     if(!passwordEncoder.matches(otpCode.getPassword(), userEntity.getPassword())) {
       throw new BitrubyRuntimeExpection("Неверная пара логин/пароль");
     }
     String code = generateRandomCode();
+    OtpLogin otpLogin = new OtpLogin();
+    otpLogin.setId(UUID.randomUUID());
+    otpLogin.setUserId(userEntity.getId());
+    otpLogin.setExpirationTime(calculateExpirationDate(EXPIRATION_TIME));
+    otpLogin.setToken(code);
+
+    otpLoginRepository.save(otpLogin);
+
     kafkaProducerService.emitOtpLoginEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
-    otpLoginTokenRepository.save(new OtpLoginTokenEntity(userEntity, code, true));
+    return new GenerateOtpCodeLoginResult(true, OffsetDateTime.now(), otpLogin.getId());
+  }
+
+  @Transactional(transactionManager = "transactionManager")
+  public Base generateOtpCodeForRegistration(GenerateOtpCodeRegistration otpCodeRegistration) {
+    UserEntity userById = findUserById(otpCodeRegistration.getRegistrationId());
+    checkUserForRegistration(userById);
+    String code = generateRandomCode();
+
+    OtpRegistration token = new OtpRegistration();
+    token.setId(UUID.randomUUID());
+    token.setUserId(otpCodeRegistration.getRegistrationId());
+    token.setToken(code);
+    token.setExpirationTime(calculateExpirationDate(EXPIRATION_TIME));
+
+    otpRegistrationRepository.save(token);
+    kafkaProducerService.emitOtpRegistrationEventMessage(OtpEventDto.builder().code(code).sendTo(userById.getEmail()).grantType(GrantType.EMAIL_PASSWORD).build());
     return new Base(true, OffsetDateTime.now());
   }
 
   @Transactional(transactionManager = "transactionManager")
-  public Base generateOtpCodeForRegistration(OtpCode otpCode) {
+  public RestorePasswordRequestOtpResult generateOtpCodeForRestoringPassword(OtpCode otpCode) {
     String sendTo = otpCode.getSendTo();
-    UserEntity userEntity = checkUserWithTokenAndReturn(otpCode.getGrantType(), sendTo);
-    String code = generateRandomCode();
-    kafkaProducerService.emitOtpRegistrationEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
-    otpRegistrationTokenEntityRepository.save(new OtpRegistrationTokenEntity(userEntity, code, true));
-    return new Base(true, OffsetDateTime.now());
-  }
+    UserEntity userEntity =
+        checkUserWithTokenAndReturn(otpCode.getGrantType(), otpCode.getSendTo());
+    checkUserWithTokenForRestorePassword(userEntity);
 
-  @Transactional(transactionManager = "transactionManager")
-  public Base generateOtpCodeForRestoringPassword(OtpCode otpCode) {
-    String sendTo = otpCode.getSendTo();
-    UserEntity userEntity = checkUserWithTokenForRestorePassword(otpCode.getGrantType(), sendTo);
     String code = generateRandomCode();
+    OtpRestorePassword otpRestorePassword = new OtpRestorePassword();
+    otpRestorePassword.setId(UUID.randomUUID());
+    otpRestorePassword.setUserId(userEntity.getId());
+    otpRestorePassword.setExpirationTime(calculateExpirationDate(EXPIRATION_TIME));
+    otpRestorePassword.setToken(code);
+
     kafkaProducerService.emitOtpRestorePasswordEventMessage(OtpEventDto.builder().code(code).sendTo(sendTo).grantType(otpCode.getGrantType()).build());
-    otpRestorePasswordTokenEntityRepository.save(new OtpRestorePasswordTokenEntity(userEntity, code, true));
-    return new Base(true, OffsetDateTime.now());
+    return new RestorePasswordRequestOtpResult(true, OffsetDateTime.now(), otpRestorePassword.getId());
   }
 
   @Transactional
   public Base checkOtpCodeForRestoringPassword(OtpCodeRestorePassword otpCodeRestorePassword) {
-    String sendTo = otpCodeRestorePassword.getSendTo();
-    checkUserWithTokenForRestorePassword(otpCodeRestorePassword.getGrantType(), sendTo);
-    OtpRestorePasswordTokenEntity token =
-        otpRestorePasswordTokenEntityRepository.findByToken(otpCodeRestorePassword.getOtp())
-            .orElseThrow(() -> new BitrubyRuntimeExpection("OTP токен не валидный"));
-    if(!token.getExpirationTime().after(new Date())) {
-      throw new BitrubyRuntimeExpection("OTP токен не валидный");
+    OtpRestorePassword token =
+        otpRestorePasswordRepository.findById(otpCodeRestorePassword.getRestorePasswordId())
+            .orElseThrow(() -> new BitrubyRuntimeExpection(TOKEN_NOT_VALID));
+    if(!token.getToken().equals(otpCodeRestorePassword.getOtp()) || !token.getExpirationTime().before(new Date()) ) {
+      throw new BitrubyRuntimeExpection(TOKEN_NOT_VALID);
     }
+    UserEntity userEntity = findUserById(token.getUserId());
+    checkUserWithTokenForRestorePassword(userEntity);
+
     return new Base(true, OffsetDateTime.now());
   }
 
-  public void checkToken(OtpCodeCheck otpCodeCheck) {
-    UserEntity userEntity =
-        checkUserWithTokenAndReturn(otpCodeCheck.getGrantType(), otpCodeCheck.getSendTo());
-    OtpRegistrationTokenEntity token = otpRegistrationTokenEntityRepository.findById(userEntity)
-        .orElseThrow(() -> new RuntimeException("Token not found"));
-    if( Objects.equals(token.getToken(), otpCodeCheck.getOtp()) && !new Date().toInstant().isAfter(token.getExpirationTime().toInstant()) ) {
-      otpRegistrationTokenEntityRepository.deleteById(userEntity);
-    } else throw new BitrubyRuntimeExpection("Token is not valid");
-  }
+  private void checkUserWithTokenForRestorePassword(UserEntity userEntity) {
 
-
-  private UserEntity checkUserWithTokenForRestorePassword(GrantType grantType, String sendTo) {
-    UserEntity userEntity;
-    if (grantType.equals(GrantType.EMAIL_PASSWORD)) {
-      userEntity = userRepository.findByEmail(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection("User not exists"));
-    } else if (grantType.equals(GrantType.PHONE_PASSWORD)) {
-      userEntity = userRepository.findByPhone(sendTo).orElseThrow(() -> new BitrubyRuntimeExpection("User not exists"));
-    } else
-      throw new BitrubyRuntimeExpection("Unknown Grant type");
     if (!userEntity.isEnabled()) {
       log.error("Попытка восстановить пароль для удаленного пользователя");
       throw new BitrubyRuntimeExpection("Пользователь не существует");
@@ -118,10 +126,12 @@ public class OtpService {
         log.error("Попытка восстановить пароль для не зарегистрированного пользователя");
         throw new BitrubyRuntimeExpection("Пользователь не существует");
       }
-      default -> {
-        return userEntity;
-      }
     }
+  }
+
+  private UserEntity findUserById(UUID userId) {
+    return userRepository.findById(userId).orElseThrow(() -> new BitrubyRuntimeExpection(
+        String.format("User with id: %s not found for the verification event", userId)));
   }
 
   private UserEntity checkUserWithTokenAndReturn(GrantType grantType, String sendTo) {
@@ -139,6 +149,13 @@ public class OtpService {
     return userEntity;
   }
 
+  private UserEntity checkUserForRegistration(UserEntity user) {
+    if(user.isEnabled() || !user.getAccountStatus().equals(AccountStatus.REGISTRATION_STAGE)) {
+      throw new BitrubyRuntimeExpection("Registration Error");
+    }
+    return user;
+  }
+
   private String generateRandomCode() {
     StringBuilder sb = new StringBuilder(6);
     for (int i = 0; i < 6; i++) {
@@ -146,6 +163,13 @@ public class OtpService {
       sb.append(CHARACTERS.charAt(randomIndex));
     }
     return sb.toString();
+  }
+
+  private Date calculateExpirationDate(int expirationTime) {
+    Calendar calendar = Calendar.getInstance();
+    calendar.setTimeInMillis(new Date().getTime());
+    calendar.add(Calendar.MINUTE, expirationTime);
+    return new Date(calendar.getTime().getTime());
   }
 
 }

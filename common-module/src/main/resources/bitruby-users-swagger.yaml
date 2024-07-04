@@ -25,7 +25,7 @@ paths:
         $ref: '#/components/requestBodies/RegisterNewUserRequest'
       responses:
         '201':
-          $ref: '#/components/responses/EmptyResponse'
+          $ref: '#/components/responses/RegisterNewUserResponse'
         '400':
           $ref: '#/components/responses/BadRequestError'
         '5XX':
@@ -38,7 +38,7 @@ paths:
       description: >-
         Complete registration of the user by email confirmation
       requestBody:
-        $ref: '#/components/requestBodies/CheckOtpCodeRequest'
+        $ref: '#/components/requestBodies/CompleteRegistrationRequest'
       operationId: completeRegistration
       tags:
         - users
@@ -117,7 +117,7 @@ paths:
         $ref: '#/components/requestBodies/GenerateOtpCodeLoginRequest'
       responses:
         '200':
-          $ref: '#/components/responses/EmptyResponse'
+          $ref: '#/components/responses/GenerateOtpCodeLoginResponse'
         '400':
           $ref: '#/components/responses/BadRequestError'
         '5XX':
@@ -151,7 +151,7 @@ paths:
         $ref: '#/components/requestBodies/GenerateOtpCodeRestorePasswordRequest'
       responses:
         '200':
-          $ref: '#/components/responses/EmptyResponse'
+          $ref: '#/components/responses/RestorePasswordRequestOtpResponse'
         '400':
           $ref: '#/components/responses/BadRequestError'
         '5XX':
@@ -209,6 +209,49 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    GenerateOtpCodeLoginResponse:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GenerateOtpCodeLoginResult'
+    RegisterNewUserResponse:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterNewUserResult'
+    RestorePasswordRequestOtpResponse:
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      description: >-
+        response with no body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RestorePasswordRequestOtpResult'
     EmptyResponse:
       headers:
         x-request-id:
@@ -226,6 +269,13 @@ components:
             $ref: '#/components/schemas/Base'
 
   requestBodies:
+    CompleteRegistrationRequest:
+      description: >-
+        Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CompleteRegistration'
     UserFormRequest:
       description: >-
         Generate OTP token for user login
@@ -246,7 +296,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/OtpCode'
+            $ref: '#/components/schemas/GenerateOtpCodeRegistration'
     GenerateOtpCodeRestorePasswordRequest:
       description: >-
         Generate OTP token for restoring the password
@@ -483,27 +533,78 @@ components:
               format: password
     RestorePassword:
       allOf:
-        - $ref: '#/components/schemas/OtpCode'
         - type: object
           required:
             - otp
             - password
+            - restorePasswordId
           properties:
             otp:
               $ref: '#/components/schemas/Otp'
             password:
               type: string
               format: password
+            restorePasswordId:
+              $ref: '#/components/schemas/Id'
 
     OtpCodeRestorePassword:
       allOf:
-        - $ref: '#/components/schemas/OtpCode'
         - type: object
           required:
             - otp
+            - restorePasswordId
           properties:
             otp:
               $ref: '#/components/schemas/Otp'
+            restorePasswordId:
+              $ref: '#/components/schemas/Id'
+
+    RegisterNewUserResult:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - registrationId
+          properties:
+            registrationId:
+              $ref: '#/components/schemas/Id'
+    CompleteRegistration:
+      allOf:
+        - type: object
+          required:
+            - registrationId
+            - otp
+          properties:
+            registrationId:
+              $ref: '#/components/schemas/Id'
+            otp:
+              $ref: '#/components/schemas/Otp'
+    RestorePasswordRequestOtpResult:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - restorePasswordId
+          properties:
+            restorePasswordId:
+              $ref: '#/components/schemas/Id'
+    GenerateOtpCodeLoginResult:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - loginId
+          properties:
+            loginId:
+              $ref: '#/components/schemas/Id'
+    GenerateOtpCodeRegistration:
+      allOf:
+        - type: object
+          required:
+            - registrationId
+          properties:
+            registrationId:
+              $ref: '#/components/schemas/Id'
     OtpCode:
       type: object
       required:

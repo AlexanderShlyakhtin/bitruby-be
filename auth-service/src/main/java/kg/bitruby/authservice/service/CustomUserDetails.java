@@ -1,6 +1,6 @@
 package kg.bitruby.authservice.service;
 
-import kg.bitruby.authservice.entity.UserEntity;
+import kg.bitruby.authservice.outcomes.postgres.entity.UserEntity;
 import kg.bitruby.commonmodule.domain.AccountStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

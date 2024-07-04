@@ -64,14 +64,15 @@ public class PhonePasswordAuthenticationConverter implements AuthenticationConve
       }
     });
 
-    String otp = parameters.getFirst("otp");
-    if (!StringUtils.hasText(otp)) {
+    String otp = (String) additionalParameters.get("otp");
+    String loginId = (String) additionalParameters.get("loginId");
+    if (!StringUtils.hasText(otp) || !StringUtils.hasText(loginId)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_REQUEST);
     }
 
     Authentication clientPrincipal = SecurityContextHolder.getContext().getAuthentication();
     return new PhonePasswordAuthenticationToken(clientPrincipal, requestedScopes, additionalParameters,
-        otp);
+        otp, loginId);
   }
 
   private static MultiValueMap<String, String> getParameters(HttpServletRequest request) {

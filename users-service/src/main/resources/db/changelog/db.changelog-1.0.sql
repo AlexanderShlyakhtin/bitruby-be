@@ -17,39 +17,11 @@ CREATE TABLE IF NOT EXISTS users
     account_status     varchar(30)  not null,
     role               varchar(255)
 );
---changeset alexander-shlyakhtin:2
+
+--changeset alexander-shlyakhtin:5
 CREATE INDEX idx_users_phone ON users (phone);
 CREATE INDEX idx_users_email ON users (email);
 
---changeset alexander-shlyakhtin:3
-CREATE TABLE IF NOT EXISTS otp_token_login
-(
-    id              uuid not null PRIMARY KEY,
-    token           varchar(6),
-    expiration_time timestamp with time zone,
-    valid           boolean,
-    FOREIGN KEY (id) REFERENCES users (user_id)
-);
-
---changeset alexander-shlyakhtin:4
-CREATE TABLE IF NOT EXISTS otp_token_registration
-(
-    id              uuid not null PRIMARY KEY,
-    token           varchar(6),
-    expiration_time timestamp with time zone,
-    valid           boolean,
-    FOREIGN KEY (id) REFERENCES users (user_id)
-);
-
---changeset alexander-shlyakhtin:5
-CREATE TABLE IF NOT EXISTS otp_token_restore_password
-(
-    id              uuid not null PRIMARY KEY,
-    token           varchar(6),
-    expiration_time timestamp with time zone,
-    valid           boolean,
-    FOREIGN KEY (id) REFERENCES users (user_id)
-);
 --changeset alexander-shlyakhtin:6
 CREATE TABLE IF NOT EXISTS users_verification_sessions
 (

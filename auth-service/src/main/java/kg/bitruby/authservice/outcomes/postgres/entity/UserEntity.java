@@ -1,4 +1,4 @@
-package kg.bitruby.authservice.entity;
+package kg.bitruby.authservice.outcomes.postgres.entity;
 
 import jakarta.persistence.*;
 import kg.bitruby.commonmodule.domain.AccountStatus;

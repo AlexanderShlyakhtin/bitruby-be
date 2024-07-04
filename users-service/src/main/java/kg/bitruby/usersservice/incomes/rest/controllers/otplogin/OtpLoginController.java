@@ -1,7 +1,7 @@
-package kg.bitruby.usersservice.incomes.rest.controllers.otpLogin;
+package kg.bitruby.usersservice.incomes.rest.controllers.otplogin;
 
 import kg.bitruby.usersservice.api.OtpLoginApiDelegate;
-import kg.bitruby.usersservice.api.model.Base;
+import kg.bitruby.usersservice.api.model.GenerateOtpCodeLoginResult;
 import kg.bitruby.usersservice.api.model.OtpCodeLogin;
 import kg.bitruby.usersservice.core.otp.OtpService;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,13 @@ public class OtpLoginController implements OtpLoginApiDelegate {
    *
    * @param xRequestId (required)
    * @param otpCodeLogin Generate OTP token for user login (optional)
-   * @return response with no body (status code 200) or error (status code 400) or error (status
-   * code 5XX)
-   * @see OtpLoginApiDelegate#generateOtpCodeForLogin
+   * @return error (status code 200) or error (status code 400) or error (status code 5XX)
+   * @see OtpLoginApi#generateOtpCodeForLogin
    */
   @Override
-  public ResponseEntity<Base> generateOtpCodeForLogin(UUID xRequestId, OtpCodeLogin otpCodeLogin) {
+  public ResponseEntity<GenerateOtpCodeLoginResult> generateOtpCodeForLogin(UUID xRequestId,
+      OtpCodeLogin otpCodeLogin) {
     return new ResponseEntity<>(otpService.generateOtpCodeForLogin(otpCodeLogin), HttpStatus.OK);
+
   }
 }

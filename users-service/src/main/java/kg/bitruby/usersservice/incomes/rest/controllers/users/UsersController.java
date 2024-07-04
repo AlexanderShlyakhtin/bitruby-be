@@ -23,14 +23,15 @@ public class UsersController implements UsersApiDelegate {
    * registration of the user by email confirmation
    *
    * @param xRequestId (required)
-   * @param otpCodeCheck Generate OTP token for user login (optional)
+   * @param completeRegistration Generate OTP token for user login (optional)
    * @return response with no body (status code 200) or error (status code 400) or error (status
    * code 5XX)
    * @see UsersApi#completeRegistration
    */
   @Override
-  public ResponseEntity<Base> completeRegistration(UUID xRequestId, OtpCodeCheck otpCodeCheck) {
-    return new ResponseEntity<>(usersService.completeRegistration(otpCodeCheck), HttpStatus.OK);
+  public ResponseEntity<Base> completeRegistration(UUID xRequestId,
+      CompleteRegistration completeRegistration) {
+    return new ResponseEntity<>(usersService.completeRegistration(completeRegistration), HttpStatus.OK);
   }
 
   /**
@@ -38,12 +39,11 @@ public class UsersController implements UsersApiDelegate {
    *
    * @param xRequestId (required)
    * @param newUser Registration body of new user\&quot; (optional)
-   * @return response with no body (status code 201) or error (status code 400) or error (status
-   * code 5XX)
+   * @return error (status code 201) or error (status code 400) or error (status code 5XX)
    * @see UsersApi#registerUser
    */
   @Override
-  public ResponseEntity<Base> registerUser(UUID xRequestId, NewUser newUser) {
+  public ResponseEntity<RegisterNewUserResult> registerUser(UUID xRequestId, NewUser newUser) {
     return new ResponseEntity<>(usersService.registerUser(newUser), HttpStatus.CREATED);
   }
 

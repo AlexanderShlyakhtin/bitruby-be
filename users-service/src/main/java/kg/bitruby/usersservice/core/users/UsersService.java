@@ -16,13 +16,15 @@ import kg.bitruby.usersservice.common.AppContextHolder;
 import kg.bitruby.usersservice.core.event.NewUserRegistrationEvent;
 import kg.bitruby.usersservice.core.event.UserCompleteRegistrationEvent;
 import kg.bitruby.usersservice.core.event.UserVerificationDecisionEvent;
-import kg.bitruby.usersservice.core.otp.OtpService;
 import kg.bitruby.usersservice.outcomes.kafka.service.KafkaProducerService;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UserEntity;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UsersVerificationSessions;
 import kg.bitruby.usersservice.outcomes.postgres.domain.VerificationSessionStatus;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UserRepository;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UsersVerificationSessionsRepository;
+import kg.bitruby.usersservice.outcomes.redis.domain.OtpLogin;
+import kg.bitruby.usersservice.outcomes.redis.repository.OtpLoginRepository;
+import kg.bitruby.usersservice.outcomes.redis.repository.OtpRegistrationRepository;
 import kg.bitruby.usersservice.outcomes.rest.veriff.api.VeriffApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,35 +51,41 @@ public class UsersService {
   private final UsersVerificationSessionsRepository verificationSessionsRepository;
   private final VeriffApiClient veriffApiClient;
   private final KafkaProducerService kafkaProducerService;
-  private final OtpService otpService;
+  private final OtpRegistrationRepository otpRegistrationRepository;
+  private final OtpLoginRepository otpLoginRepository;
 
   @Value("${bitruby.verification.callback-url}")
   private String callbackUrl;
 
   @Transactional
-  public Base registerUser(NewUser registerUser) {
+  public RegisterNewUserResult registerUser(NewUser registerUser) {
     preRegistrationCheck(registerUser);
-
     UserEntity userEntity = new UserEntity();
     userEntity.setPhone(registerUser.getPhone());
     userEntity.setEmail(registerUser.getEmail());
     userEntity.setPassword(passwordEncoder.encode(registerUser.getPassword()));
-    userEntity.setEnabled(false);
+    userEntity.setEnabled(true);
     userEntity.setEmailConfirmed(false);
     userEntity.setPhoneConfirmed(false);
     userEntity.setAccountStatus(AccountStatus.REGISTRATION_STAGE);
     userEntity.setRole(AuthorityRoleEnum.USER);
-    userRepository.save(userEntity);
+    UserEntity save = userRepository.save(userEntity);
     publisher.publishEvent(new NewUserRegistrationEvent(userEntity));
 
-    return new Base(true, OffsetDateTime.now());
+    return new RegisterNewUserResult(true, OffsetDateTime.now(), save.getId());
 
   }
 
   @Transactional
-  public Base completeRegistration(OtpCodeCheck otpCodeCheck) {
-    otpService.checkToken(otpCodeCheck);
-    UserEntity userEntity = getUserEntityByGrantType(otpCodeCheck.getGrantType(), otpCodeCheck.getSendTo());
+  public Base completeRegistration(CompleteRegistration otpCodeCheck) {
+    OtpLogin token =
+        otpLoginRepository.findByUserId(otpCodeCheck.getRegistrationId()).orElseThrow(() -> new BitrubyRuntimeExpection(
+            "Token not valid"));
+    if(!token.getToken().equals(otpCodeCheck.getOtp())) {
+      throw new BitrubyRuntimeExpection("Token not valid");
+    }
+
+    UserEntity userEntity = findUserById(otpCodeCheck.getRegistrationId());
     userEntity.setEnabled(true);
     userEntity.setAccountStatus(AccountStatus.NOT_VERIFIED);
     userEntity.setEmailConfirmed(true);
@@ -87,17 +95,6 @@ public class UsersService {
     return new Base(true, OffsetDateTime.now());
   }
 
-  private UserEntity getUserEntityByGrantType(GrantType grantType, String sendTo) {
-    UserEntity userEntity;
-    if(grantType.equals(GrantType.EMAIL_PASSWORD)) {
-      userEntity = userRepository.findByEmail(sendTo)
-          .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
-    } else if(grantType.equals(GrantType.PHONE_PASSWORD)) {
-      userEntity = userRepository.findByPhone(sendTo)
-          .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
-    } else throw new BitrubyRuntimeExpection("Unknown grant type");
-    return userEntity;
-  }
 
   public void handleVerificationEvent(VerificationEventDto event) {
     log.info("Receive VerificationEvent: {}", event.toString());

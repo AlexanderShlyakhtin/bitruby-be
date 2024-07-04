@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
 
 import java.security.Principal;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,10 +45,6 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
   private final OAuth2AuthorizationService authorizationService;
   private final PasswordEncoder passwordEncoder;
   private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
-  private String username = "";
-  private String password = "";
-  private String otp = "";
-  private Set<String> authorizedScopes = new HashSet<>();
 
   public PhonePasswordAuthenticationProvider(
       OAuth2AuthorizationService authorizationService, PasswordEncoder passwordEncoder,
@@ -67,9 +63,10 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
         customPasswordAuthenticationToken = (PhonePasswordAuthenticationToken) authentication;
     OAuth2ClientAuthenticationToken clientPrincipal = getAuthenticatedClientElseThrowInvalidClient(customPasswordAuthenticationToken);
     RegisteredClient registeredClient = clientPrincipal.getRegisteredClient();
-    username = customPasswordAuthenticationToken.getUsername();
-    password = customPasswordAuthenticationToken.getPassword();
-    otp = customPasswordAuthenticationToken.getOtp();
+    String username = customPasswordAuthenticationToken.getUsername();
+    String password = customPasswordAuthenticationToken.getPassword();
+    String otp = customPasswordAuthenticationToken.getOtp();
+    UUID loginId = customPasswordAuthenticationToken.getLoginId();
     CustomUserDetails user = null;
     try {
       user = userDetailsService.loadUserByUsername(username);
@@ -79,10 +76,10 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
     if (!passwordEncoder.matches(password, user.getPassword()) || !user.getPhone().equals(username)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
-    if(!otpService.checkAndUseOtpCode(GrantType.PHONE_PASSWORD, user.getUserEntity(), otp)) {
+    if(!otpService.checkAndUseOtpCode(user.getUserEntity(), otp, loginId)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
-    authorizedScopes = user.getAuthorities().stream()
+    Set<String> authorizedScopes = user.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .filter(scope -> registeredClient.getScopes().contains(scope))
         .collect(Collectors.toSet());

@@ -26,6 +26,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:9000/auth/api/v1
+  data:
+    redis:
+      host: localhost
+      port: 6379
   jpa:
     properties:
       hibernate:

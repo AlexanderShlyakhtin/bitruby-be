@@ -12,7 +12,7 @@ import kg.bitruby.authservice.config.granttypes.phone_password.PhonePasswordAuth
 import kg.bitruby.authservice.config.granttypes.phone_password.PhonePasswordAuthenticationProvider;
 import kg.bitruby.authservice.config.granttypes.phone_password.PhonePasswordAuthenticationToken;
 import kg.bitruby.authservice.config.model.CustomPasswordUser;
-import kg.bitruby.authservice.entity.UserEntity;
+import kg.bitruby.authservice.outcomes.postgres.entity.UserEntity;
 import kg.bitruby.authservice.service.UserInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

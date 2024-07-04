@@ -6,10 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationGrantAuthenticationToken;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class EmailPasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
@@ -18,15 +15,18 @@ public class EmailPasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
   private final String password;
   private final Set<String> scopes;
   private final String otp;
+  private final UUID loginId;
 
   public EmailPasswordAuthenticationToken(Authentication clientPrincipal,
-      @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters, String otp) {
+      @Nullable Set<String> scopes, @Nullable Map<String, Object> additionalParameters, String otp,
+      String loginId) {
     super(new AuthorizationGrantType(GrantType.EMAIL_PASSWORD.getValue()), clientPrincipal, additionalParameters);
     this.username = (String) additionalParameters.get("username");
     this.password = (String) additionalParameters.get("password");
     this.otp = (String) additionalParameters.get("otp");
     this.scopes = Collections.unmodifiableSet(
         scopes != null ? new HashSet<>(scopes) : Collections.emptySet());
+    this.loginId = UUID.fromString(loginId);
   }
 
   public String getUsername() {
@@ -43,5 +43,9 @@ public class EmailPasswordAuthenticationToken extends OAuth2AuthorizationGrantAu
 
   public String getOtp() {
     return otp;
+  }
+
+  public UUID getLoginId() {
+    return loginId;
   }
 }

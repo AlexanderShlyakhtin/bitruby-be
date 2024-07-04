@@ -123,6 +123,7 @@ components:
                   - password
                   - scope
                   - otp
+                  - loginId
                 properties:
                   grant_type:
                     $ref: '#/components/schemas/GrantType'
@@ -135,8 +136,9 @@ components:
                     type: string
                   otp:
                     type: string
-
-
+                  loginId:
+                    type: string
+                    format: uuid
   securitySchemes:
     basicAuth:
       type: http

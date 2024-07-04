@@ -1,8 +1,8 @@
 package kg.bitruby.authservice.service;
 
 import jakarta.transaction.Transactional;
-import kg.bitruby.authservice.entity.UserEntity;
-import kg.bitruby.authservice.repository.UserRepository;
+import kg.bitruby.authservice.outcomes.postgres.entity.UserEntity;
+import kg.bitruby.authservice.outcomes.postgres.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,7 +19,7 @@ public class UserDetailsByEmailService implements UserDetailsService {
 
   @Override
   public CustomUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-    Optional<UserEntity> user = userRepository.findByEmail(email);
+    Optional<UserEntity> user = userRepository.findByEmailAndIsEnabledTrue(email);
     CustomUserDetails customUserDetails = user.map(CustomUserDetails::new)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     if(!customUserDetails.isEnabled()

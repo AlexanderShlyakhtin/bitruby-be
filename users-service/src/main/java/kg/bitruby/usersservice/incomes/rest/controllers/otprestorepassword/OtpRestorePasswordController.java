@@ -1,9 +1,10 @@
-package kg.bitruby.usersservice.incomes.rest.controllers.otpRestorePassword;
+package kg.bitruby.usersservice.incomes.rest.controllers.otprestorepassword;
 
 import kg.bitruby.usersservice.api.OtpRestorePasswordApiDelegate;
 import kg.bitruby.usersservice.api.model.Base;
 import kg.bitruby.usersservice.api.model.OtpCode;
 import kg.bitruby.usersservice.api.model.OtpCodeRestorePassword;
+import kg.bitruby.usersservice.api.model.RestorePasswordRequestOtpResult;
 import kg.bitruby.usersservice.core.otp.OtpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,8 +31,8 @@ public class OtpRestorePasswordController implements OtpRestorePasswordApiDelega
    * @see OtpRestorePasswordApi#generateOtpCodeForRestoringPassword
    */
   @Override
-  public ResponseEntity<Base> generateOtpCodeForRestoringPassword(UUID xRequestId,
-      OtpCode otpCode) {
+  public ResponseEntity<RestorePasswordRequestOtpResult> generateOtpCodeForRestoringPassword(
+      UUID xRequestId, OtpCode otpCode) {
     return new ResponseEntity<>(otpService.generateOtpCodeForRestoringPassword(otpCode), HttpStatus.OK);
   }
 

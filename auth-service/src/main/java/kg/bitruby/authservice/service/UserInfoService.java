@@ -1,8 +1,8 @@
 package kg.bitruby.authservice.service;
 
 
-import kg.bitruby.authservice.entity.UserEntity;
-import kg.bitruby.authservice.repository.UserRepository;
+import kg.bitruby.authservice.outcomes.postgres.entity.UserEntity;
+import kg.bitruby.authservice.outcomes.postgres.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ public class UserInfoService {
   private final UserRepository userInfoRepository;
 
   public UserEntity getUserInfoByEmail(String name) {
-    Optional<UserEntity> byEmail = userInfoRepository.findByEmail(name);
+    Optional<UserEntity> byEmail = userInfoRepository.findByEmailAndIsEnabledTrue(name);
     if(byEmail.isPresent()){
       return byEmail.get();
     }
@@ -24,7 +24,7 @@ public class UserInfoService {
   }
 
   public UserEntity getUserInfoByPhone(String name) {
-    Optional<UserEntity> byEmail = userInfoRepository.findByPhone(name);
+    Optional<UserEntity> byEmail = userInfoRepository.findByPhoneAndIsEnabledTrue(name);
     if(byEmail.isPresent()){
       return byEmail.get();
     }
