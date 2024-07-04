@@ -78,7 +78,7 @@ public class EmailPasswordAuthenticationProvider implements AuthenticationProvid
     if (!passwordEncoder.matches(password, user.getPassword()) || !user.getUsername().equals(username)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
-    if(!otpService.checkAndUseOtpCode(username, otp)) {
+    if(!otpService.checkAndUseOtpCode(GrantType.EMAIL_PASSWORD, user.getUserEntity(), otp)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
     authorizedScopes = user.getAuthorities().stream()

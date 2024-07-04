@@ -2,6 +2,7 @@ package kg.bitruby.usersservice.outcomes.postgres.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -19,12 +20,13 @@ public class OtpRestorePasswordTokenEntity {
 
   private static final int EXPIRATION_TIME = 30;
   @Id
-  private String id;
+  @OneToOne
+  private UserEntity id;
   private String token;
   private Date expirationTime;
   private Boolean valid;
 
-  public OtpRestorePasswordTokenEntity(String id, String token, Boolean valid) {
+  public OtpRestorePasswordTokenEntity(UserEntity id, String token, Boolean valid) {
     this.id = id;
     this.token = token;
     this.expirationTime = calculateExpirationDate(EXPIRATION_TIME);

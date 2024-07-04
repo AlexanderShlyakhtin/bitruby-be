@@ -79,7 +79,7 @@ public class PhonePasswordAuthenticationProvider implements AuthenticationProvid
     if (!passwordEncoder.matches(password, user.getPassword()) || !user.getPhone().equals(username)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
-    if(!otpService.checkAndUseOtpCode(username, otp)) {
+    if(!otpService.checkAndUseOtpCode(GrantType.PHONE_PASSWORD, user.getUserEntity(), otp)) {
       throw new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED);
     }
     authorizedScopes = user.getAuthorities().stream()

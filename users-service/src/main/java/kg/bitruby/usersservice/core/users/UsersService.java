@@ -16,12 +16,11 @@ import kg.bitruby.usersservice.common.AppContextHolder;
 import kg.bitruby.usersservice.core.event.NewUserRegistrationEvent;
 import kg.bitruby.usersservice.core.event.UserCompleteRegistrationEvent;
 import kg.bitruby.usersservice.core.event.UserVerificationDecisionEvent;
+import kg.bitruby.usersservice.core.otp.OtpService;
 import kg.bitruby.usersservice.outcomes.kafka.service.KafkaProducerService;
-import kg.bitruby.usersservice.outcomes.postgres.domain.OtpRegistrationTokenEntity;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UserEntity;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UsersVerificationSessions;
 import kg.bitruby.usersservice.outcomes.postgres.domain.VerificationSessionStatus;
-import kg.bitruby.usersservice.outcomes.postgres.repository.OtpRegistrationTokenRepository;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UserRepository;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UsersVerificationSessionsRepository;
 import kg.bitruby.usersservice.outcomes.rest.veriff.api.VeriffApiClient;
@@ -35,7 +34,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,18 +46,16 @@ public class UsersService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final ApplicationEventPublisher publisher;
-  private final OtpRegistrationTokenRepository otpTokenRepository;
   private final UsersVerificationSessionsRepository verificationSessionsRepository;
   private final VeriffApiClient veriffApiClient;
   private final KafkaProducerService kafkaProducerService;
+  private final OtpService otpService;
 
   @Value("${bitruby.verification.callback-url}")
   private String callbackUrl;
 
   @Transactional
   public Base registerUser(NewUser registerUser) {
-    userRepository.findByEmail(registerUser.getEmail()).ifPresent(user -> {throw new BitrubyRuntimeExpection("Email already registered");});
-
     preRegistrationCheck(registerUser);
 
     UserEntity userEntity = new UserEntity();
@@ -77,7 +76,7 @@ public class UsersService {
 
   @Transactional
   public Base completeRegistration(OtpCodeCheck otpCodeCheck) {
-    checkToken(otpCodeCheck);
+    otpService.checkToken(otpCodeCheck);
     UserEntity userEntity = getUserEntityByGrantType(otpCodeCheck.getGrantType(), otpCodeCheck.getSendTo());
     userEntity.setEnabled(true);
     userEntity.setAccountStatus(AccountStatus.NOT_VERIFIED);
@@ -98,14 +97,6 @@ public class UsersService {
           .orElseThrow(() -> new BitrubyRuntimeExpection("Token is not valid"));
     } else throw new BitrubyRuntimeExpection("Unknown grant type");
     return userEntity;
-  }
-
-  private void checkToken(OtpCodeCheck otpCodeCheck) {
-    OtpRegistrationTokenEntity token =
-        otpTokenRepository.findById(otpCodeCheck.getSendTo()).orElseThrow(() -> new RuntimeException("Token not found"));
-    if( Objects.equals(token.getToken(), otpCodeCheck.getOtp()) && !new Date().toInstant().isAfter(token.getExpirationTime().toInstant()) ) {
-      otpTokenRepository.deleteById(otpCodeCheck.getSendTo());
-    } else throw new BitrubyRuntimeExpection("Token is not valid");
   }
 
   public void handleVerificationEvent(VerificationEventDto event) {

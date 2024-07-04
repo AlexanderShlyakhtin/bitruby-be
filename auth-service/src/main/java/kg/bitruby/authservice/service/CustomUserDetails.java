@@ -37,6 +37,10 @@ public class CustomUserDetails implements UserDetails {
     return user.getPhone();
   }
 
+  public UserEntity getUserEntity() {
+    return user;
+  }
+
   @Override
   public boolean isEnabled() {
     return user.isEnabled();
