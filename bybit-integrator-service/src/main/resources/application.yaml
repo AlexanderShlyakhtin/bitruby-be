@@ -1,0 +1,87 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /bybit-integrator
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: bybit-integrator
+  liquibase:
+    change-log: db/db.changelog.yaml
+    liquibase-schema: bybit
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bitruby?currentSchema=bybit
+    username:
+    password:
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/auth/api/v1
+  jpa:
+    properties:
+      hibernate:
+        default_schema: bybit
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: localhost:29092
+    properties:
+      enable.idempotence: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: "bitruby-bybit-integrator"
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+logging:
+  level:
+    org:
+      springframework.security: trace
+      springframework.web: trace
+      apache:
+        kafka: error
+        http: DEBUG
+        orm:
+          jpa:
+            JpaTransactionManager: trace
+        transaction: trace
+        listener:
+          KafkaMessageListenerContainer: error
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+
+bitruby:
+  auth:
+    url: http://auth-server:9000/auth/api/v1
+  bybit:
+    active: true
+    bybit-api-secret:
+    bybit-api-key:
+    recvWindow: 50000
+    url: https://api-testnet.bybit.com
+  kafka:
+    topics:
+      bybit:
+        create-sub-account:
+          name: "create-sub-account"
+          numPartitions: 1
+          replicationFactor: 1
+
+
+
+

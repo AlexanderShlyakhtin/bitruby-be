@@ -23,10 +23,10 @@
 
     <modules>
         <module>common-module</module>
-        <module>auth-server</module>
-        <module>users-app</module>
+        <module>auth-service</module>
+        <module>users-service</module>
         <module>notifications-service</module>
-        <module>bybit-integrator</module>
+        <module>bybit-integrator-service</module>
 
     </modules>
 

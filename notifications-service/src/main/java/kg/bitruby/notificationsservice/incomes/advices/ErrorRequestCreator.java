@@ -2,7 +2,7 @@ package kg.bitruby.notificationsservice.incomes.advices;
 
 import kg.bitruby.commonmodule.exceptions.ErrorCodeEnum;
 import kg.bitruby.notificationsservice.common.AppContextHolder;
-import kg.bitruby.usersapp.api.model.Error;
+import kg.bitruby.usersservice.api.model.Error;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

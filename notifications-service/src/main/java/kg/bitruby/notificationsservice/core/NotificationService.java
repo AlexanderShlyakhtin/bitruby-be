@@ -7,7 +7,7 @@ import kg.bitruby.notificationsservice.client.smstraffic.api.model.Reply;
 import kg.bitruby.notificationsservice.outcomes.rest.sendsay.EmailServiceClient;
 import kg.bitruby.notificationsservice.outcomes.rest.sendsay.mapper.OtpEventEmailMapper;
 import kg.bitruby.notificationsservice.outcomes.rest.smstraffic.SmsServiceClient;
-import kg.bitruby.usersapp.api.model.GrantType;
+import kg.bitruby.usersservice.api.model.GrantType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
