@@ -3,7 +3,6 @@ package kg.bitruby.usersservice.core.restorepassword;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.api.model.Base;
 import kg.bitruby.usersservice.api.model.RestorePassword;
-import kg.bitruby.usersservice.core.otp.OtpService;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UserEntity;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UserRepository;
 import kg.bitruby.usersservice.outcomes.redis.domain.OtpRestorePassword;
@@ -25,13 +24,10 @@ public class RestorePasswordService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final OtpService otpService;
   private final OtpRestorePasswordRepository otpRestorePasswordRepository;
 
   public Base restorePassword(RestorePassword restorePassword) {
-    OtpRestorePassword otpRestorePassword =
-        otpRestorePasswordRepository.findById(restorePassword.getRestorePasswordId())
-            .orElseThrow(() -> new BitrubyRuntimeExpection(TOKEN_NOT_VALID));
+    OtpRestorePassword otpRestorePassword = otpRestorePasswordRepository.findById(restorePassword.getRestorePasswordId().toString()).orElseThrow(() -> new BitrubyRuntimeExpection(TOKEN_NOT_VALID));
     UserEntity userEntity = findUserById(otpRestorePassword.getUserId());
 
     checkUserWithTokenForRestorePassword(userEntity);

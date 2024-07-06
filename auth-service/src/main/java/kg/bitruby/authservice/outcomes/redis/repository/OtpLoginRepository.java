@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface OtpLoginRepository extends CrudRepository<OtpLogin, UUID> {
+public interface OtpLoginRepository extends CrudRepository<OtpLogin, String> {
   Optional<OtpLogin> findByUserId(UUID userId);
 }

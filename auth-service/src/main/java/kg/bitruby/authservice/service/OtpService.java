@@ -22,12 +22,11 @@ public class OtpService {
   private final OtpLoginRepository otpLoginRepository;
 
   public boolean checkAndUseOtpCode(UserEntity userEntity, String otpToCheck, UUID loginId) {
-    OtpLogin token = otpLoginRepository.findById(loginId)
-        .orElseThrow(() -> new OAuth2AuthenticationException(OAuth2ErrorCodes.ACCESS_DENIED));
-    if(!token.getToken().equals(otpToCheck) || !token.getExpirationTime().before(new Date()) || !token.getUserId().equals(userEntity.getId())) {
+    OtpLogin token = otpLoginRepository.findById(loginId.toString()).orElseThrow(() -> new OAuth2AuthenticationException(OAuth2ErrorCodes.INVALID_TOKEN));
+    if(!token.getToken().equals(otpToCheck) || !(new Date().before(token.getExpirationTime())) || !token.getUserId().equals(userEntity.getId())) {
       return false;
     } else {
-      otpLoginRepository.deleteById(token.getId());
+      otpLoginRepository.deleteById(token.getId().toString());
       return true;
     }
   }

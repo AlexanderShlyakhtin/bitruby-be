@@ -1,8 +1,6 @@
 --liquibase formatted sql
 
 --changeset alexander-shlyakhtin:1
-CREATE SCHEMA IF NOT EXISTS bybit;
---changeset alexander-shlyakhtin:2
 CREATE TABLE IF NOT EXISTS bybit.accounts
 (
     id         UUID PRIMARY KEY,

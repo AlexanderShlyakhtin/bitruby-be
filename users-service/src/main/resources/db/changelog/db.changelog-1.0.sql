@@ -1,7 +1,7 @@
 --liquibase formatted sql
 
 --changeset alexander-shlyakhtin:1
-CREATE TABLE IF NOT EXISTS users
+CREATE TABLE IF NOT EXISTS users.users
 (
     user_id            uuid         not null PRIMARY KEY,
     phone              varchar(100) not null,
@@ -18,12 +18,12 @@ CREATE TABLE IF NOT EXISTS users
     role               varchar(255)
 );
 
---changeset alexander-shlyakhtin:5
-CREATE INDEX idx_users_phone ON users (phone);
-CREATE INDEX idx_users_email ON users (email);
+--changeset alexander-shlyakhtin:2
+CREATE INDEX idx_users_phone ON users.users (phone);
+CREATE INDEX idx_users_email ON users.users (email);
 
---changeset alexander-shlyakhtin:6
-CREATE TABLE IF NOT EXISTS users_verification_sessions
+--changeset alexander-shlyakhtin:3
+CREATE TABLE IF NOT EXISTS users.users_verification_sessions
 (
     id          UUID PRIMARY KEY,
     user_id     UUID        not null,
@@ -32,20 +32,16 @@ CREATE TABLE IF NOT EXISTS users_verification_sessions
     active      BOOLEAN     not null,
     created     timestamptz not NULL,
     updated     timestamptz not NULL,
-    FOREIGN KEY (user_id) REFERENCES users (user_id),
+    FOREIGN KEY (user_id) REFERENCES users.users (user_id),
     UNIQUE (id, user_id)
 );
---changeset alexander-shlyakhtin:7
-CREATE TABLE IF NOT EXISTS users_documents
+--changeset alexander-shlyakhtin:4
+CREATE TABLE IF NOT EXISTS users.users_documents
 (
     id            UUID PRIMARY KEY,
     user_id       UUID         not null,
     payload       bytea        not null,
     document_type varchar(255) not null,
 
-    FOREIGN KEY (user_id) REFERENCES users (user_id)
+    FOREIGN KEY (user_id) REFERENCES users.users (user_id)
 );
-
-
-
-

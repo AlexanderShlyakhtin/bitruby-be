@@ -66,6 +66,8 @@ management:
 
 
 bitruby:
+  bybit-integrator-service:
+    db.schema: bybit
   auth:
     url: http://auth-server:9000/auth/api/v1
   bybit:

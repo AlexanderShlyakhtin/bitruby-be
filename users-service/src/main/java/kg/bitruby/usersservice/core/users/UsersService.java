@@ -1,7 +1,6 @@
 package kg.bitruby.usersservice.core.users;
 
 import kg.bitruby.commonmodule.domain.AccountStatus;
-import kg.bitruby.commonmodule.domain.AuthorityRoleEnum;
 import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
 import kg.bitruby.commonmodule.dto.events.VerificationDecisionDto;
 import kg.bitruby.commonmodule.dto.events.VerificationDecisionStatus;
@@ -22,9 +21,11 @@ import kg.bitruby.usersservice.outcomes.postgres.domain.UsersVerificationSession
 import kg.bitruby.usersservice.outcomes.postgres.domain.VerificationSessionStatus;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UserRepository;
 import kg.bitruby.usersservice.outcomes.postgres.repository.UsersVerificationSessionsRepository;
-import kg.bitruby.usersservice.outcomes.redis.domain.OtpLogin;
+import kg.bitruby.usersservice.outcomes.redis.domain.OtpRegistration;
+import kg.bitruby.usersservice.outcomes.redis.domain.PreUserRegistration;
 import kg.bitruby.usersservice.outcomes.redis.repository.OtpLoginRepository;
 import kg.bitruby.usersservice.outcomes.redis.repository.OtpRegistrationRepository;
+import kg.bitruby.usersservice.outcomes.redis.repository.PreUserRegistrationRepository;
 import kg.bitruby.usersservice.outcomes.rest.veriff.api.VeriffApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class UsersService {
+  private final OtpRegistrationRepository otpRegistrationRepository;
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -51,41 +53,39 @@ public class UsersService {
   private final UsersVerificationSessionsRepository verificationSessionsRepository;
   private final VeriffApiClient veriffApiClient;
   private final KafkaProducerService kafkaProducerService;
-  private final OtpRegistrationRepository otpRegistrationRepository;
+  private final PreUserRegistrationRepository preUserRegistrationRepository;
   private final OtpLoginRepository otpLoginRepository;
+  private final UsersMapper usersMapper;
 
   @Value("${bitruby.verification.callback-url}")
   private String callbackUrl;
 
-  @Transactional
+  @Transactional(transactionManager = "transactionManager")
   public RegisterNewUserResult registerUser(NewUser registerUser) {
     preRegistrationCheck(registerUser);
     UserEntity userEntity = new UserEntity();
-    userEntity.setPhone(registerUser.getPhone());
-    userEntity.setEmail(registerUser.getEmail());
-    userEntity.setPassword(passwordEncoder.encode(registerUser.getPassword()));
-    userEntity.setEnabled(true);
-    userEntity.setEmailConfirmed(false);
-    userEntity.setPhoneConfirmed(false);
-    userEntity.setAccountStatus(AccountStatus.REGISTRATION_STAGE);
-    userEntity.setRole(AuthorityRoleEnum.USER);
-    UserEntity save = userRepository.save(userEntity);
+    PreUserRegistration preRegistrationUser =
+        usersMapper.map(registerUser, passwordEncoder.encode(registerUser.getPassword()));
+
+    PreUserRegistration save = preUserRegistrationRepository.save(preRegistrationUser);
     publisher.publishEvent(new NewUserRegistrationEvent(userEntity));
 
-    return new RegisterNewUserResult(true, OffsetDateTime.now(), save.getId());
+    return new RegisterNewUserResult(true, OffsetDateTime.now(), UUID.fromString(save.getUuid()) );
 
   }
 
   @Transactional
   public Base completeRegistration(CompleteRegistration otpCodeCheck) {
-    OtpLogin token =
-        otpLoginRepository.findByUserId(otpCodeCheck.getRegistrationId()).orElseThrow(() -> new BitrubyRuntimeExpection(
+    OtpRegistration token = otpRegistrationRepository.findById(otpCodeCheck.getRegistrationId().toString()).orElseThrow(() -> new BitrubyRuntimeExpection(
             "Token not valid"));
     if(!token.getToken().equals(otpCodeCheck.getOtp())) {
       throw new BitrubyRuntimeExpection("Token not valid");
     }
+    PreUserRegistration preRegistration =
+        preUserRegistrationRepository.findById( otpCodeCheck.getRegistrationId().toString() )
+            .orElseThrow(() -> new BitrubyRuntimeExpection("Retry registration"));
 
-    UserEntity userEntity = findUserById(otpCodeCheck.getRegistrationId());
+    UserEntity userEntity = usersMapper.toEntity(preRegistration);
     userEntity.setEnabled(true);
     userEntity.setAccountStatus(AccountStatus.NOT_VERIFIED);
     userEntity.setEmailConfirmed(true);
@@ -95,6 +95,55 @@ public class UsersService {
     return new Base(true, OffsetDateTime.now());
   }
 
+  @Transactional
+  public Base applyUserForm(UserForm userForm) {
+    UUID userId = AppContextHolder.getContextUserId();
+
+    UserEntity userEntity = findUserById(userId);
+    userEntity.setFirstName(userForm.getFirstName());
+    userEntity.setLastName(userForm.getLastName());
+    userEntity.setAddress(userForm.getAddress());
+    userRepository.save(userEntity);
+
+    Optional<UsersVerificationSessions> optionalActiveSession =
+        verificationSessionsRepository.findByUserId_IdAndActiveTrue(userId);
+    if(optionalActiveSession.isEmpty()) {
+      NewSessionVerification newSessionVerification = mapVerification(userId, userForm);
+      NewSession newSession = new NewSession();
+      newSession.setVerification(newSessionVerification);
+      Session session = veriffApiClient.createSession(newSession);
+
+      UsersVerificationSessions verificationSessions = new UsersVerificationSessions();
+      verificationSessions.setId(session.getVerification().getId());
+      verificationSessions.setSessionUrl(session.getVerification().getUrl());
+      verificationSessions.setActive(true);
+      verificationSessions.setCreated(OffsetDateTime.now());
+      verificationSessions.setUpdated(OffsetDateTime.now());
+      verificationSessions.setUserId(userEntity);
+      verificationSessions.setStatus(VerificationSessionStatus.WAITING_FOR_START);
+      verificationSessionsRepository.save(verificationSessions);
+    }
+
+    return new Base(true, OffsetDateTime.now());
+  }
+
+  public UserVerification getUserVerificationData() {
+    UUID userId = AppContextHolder.getContextUserId();
+
+    UserVerification userVerification = new UserVerification();
+    Optional<UsersVerificationSessions> optionalVerificationSessions =
+        verificationSessionsRepository.findByUserId_IdAndActiveTrue(userId);
+    if(optionalVerificationSessions.isPresent()) {
+      UsersVerificationSessions verificationSessions = optionalVerificationSessions.get();
+      userVerification.setVerificationSession(JsonNullable.of(new UserVerificationAllOfVerificationSession(verificationSessions.getSessionUrl(), VerificationStatus.fromValue(verificationSessions.getStatus().getValue()))));
+      UserEntity userEntity = verificationSessions.getUserId();
+      userVerification.setUser(new UserForm(userEntity.getFirstName(), userEntity.getLastName(), userEntity.getAddress()));
+    }
+    userVerification.setSuccess(true);
+    userVerification.setTimestamp(OffsetDateTime.now());
+
+    return userVerification;
+  }
 
   public void handleVerificationEvent(VerificationEventDto event) {
     log.info("Receive VerificationEvent: {}", event.toString());
@@ -163,56 +212,6 @@ public class UsersService {
   private UserEntity findUserById(UUID userId) {
     return userRepository.findById(userId).orElseThrow(() -> new BitrubyRuntimeExpection(
         String.format("User with id: %s not found for the verification event", userId)));
-  }
-
-  @Transactional
-  public Base applyUserForm(UserForm userForm) {
-    UUID userId = AppContextHolder.getContextUserId();
-
-    UserEntity userEntity = findUserById(userId);
-    userEntity.setFirstName(userForm.getFirstName());
-    userEntity.setLastName(userForm.getLastName());
-    userEntity.setAddress(userForm.getAddress());
-    userRepository.save(userEntity);
-
-    Optional<UsersVerificationSessions> optionalActiveSession =
-        verificationSessionsRepository.findByUserId_IdAndActiveTrue(userId);
-    if(optionalActiveSession.isEmpty()) {
-      NewSessionVerification newSessionVerification = mapVerification(userId, userForm);
-      NewSession newSession = new NewSession();
-      newSession.setVerification(newSessionVerification);
-      Session session = veriffApiClient.createSession(newSession);
-
-      UsersVerificationSessions verificationSessions = new UsersVerificationSessions();
-      verificationSessions.setId(session.getVerification().getId());
-      verificationSessions.setSessionUrl(session.getVerification().getUrl());
-      verificationSessions.setActive(true);
-      verificationSessions.setCreated(OffsetDateTime.now());
-      verificationSessions.setUpdated(OffsetDateTime.now());
-      verificationSessions.setUserId(userEntity);
-      verificationSessions.setStatus(VerificationSessionStatus.WAITING_FOR_START);
-      verificationSessionsRepository.save(verificationSessions);
-    }
-
-    return new Base(true, OffsetDateTime.now());
-  }
-
-  public UserVerification getUserVerificationData() {
-    UUID userId = AppContextHolder.getContextUserId();
-
-    UserVerification userVerification = new UserVerification();
-    Optional<UsersVerificationSessions> optionalVerificationSessions =
-        verificationSessionsRepository.findByUserId_IdAndActiveTrue(userId);
-    if(optionalVerificationSessions.isPresent()) {
-      UsersVerificationSessions verificationSessions = optionalVerificationSessions.get();
-      userVerification.setVerificationSession(JsonNullable.of(new UserVerificationAllOfVerificationSession(verificationSessions.getSessionUrl(), VerificationStatus.fromValue(verificationSessions.getStatus().getValue()))));
-      UserEntity userEntity = verificationSessions.getUserId();
-      userVerification.setUser(new UserForm(userEntity.getFirstName(), userEntity.getLastName(), userEntity.getAddress()));
-    }
-    userVerification.setSuccess(true);
-    userVerification.setTimestamp(OffsetDateTime.now());
-
-    return userVerification;
   }
 
   private NewSessionVerification mapVerification(UUID userId, UserForm userForm) {

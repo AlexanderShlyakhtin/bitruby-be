@@ -30,6 +30,12 @@ spring:
     redis:
       host: localhost
       port: 6379
+      jedis:
+        pool:
+          enabled: true
+          max-active: 20
+          min-idle: 5
+          max-idle: 10
   jpa:
     properties:
       hibernate:
@@ -70,6 +76,9 @@ management:
         include: '*'
 
 bitruby:
+  users-service:
+    db:
+      schema: users
   frontend:
     url: http://localhost:4200
   auth:

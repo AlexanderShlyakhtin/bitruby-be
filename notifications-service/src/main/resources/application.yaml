@@ -17,9 +17,9 @@ bitruby:
     url: https://api.smstraffic.ru
     login:
     password:
-    active: true
+    active: false
   sendSay:
-    active: true
+    active: false
     url: https://api.sendsay.ru/general/api/v100/json/
     apiKey:
     apiLogin:
