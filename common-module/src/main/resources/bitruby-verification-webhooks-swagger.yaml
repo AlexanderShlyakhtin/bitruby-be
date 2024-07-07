@@ -7,7 +7,7 @@ servers:
   - url: /api/v1
     description: The URL prefix for API server
 tags:
-  - name: verification
+  - name: verification-webhooks
 paths:
   /public/verification/event:
     post:
@@ -18,7 +18,7 @@ paths:
         - $ref: '#/components/parameters/XSignature'
         - $ref: '#/components/parameters/XHmacSignature'
       tags:
-        - verification
+        - verification-webhooks
       requestBody:
         $ref: '#/components/requestBodies/VerificationEventRequest'
       responses:
@@ -37,7 +37,7 @@ paths:
         - $ref: '#/components/parameters/XSignature'
         - $ref: '#/components/parameters/XHmacSignature'
       tags:
-        - verification
+        - verification-webhooks
       requestBody:
         $ref: '#/components/requestBodies/VerificationDecisionRequest'
       responses:

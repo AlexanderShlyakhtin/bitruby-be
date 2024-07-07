@@ -1,9 +1,9 @@
-package kg.bitruby.usersservice.incomes.rest.controllers.otplogin;
+package kg.bitruby.usersservice.incomes.rest.controllers.login;
 
-import kg.bitruby.usersservice.api.OtpLoginApiDelegate;
+import kg.bitruby.usersservice.api.LoginApiDelegate;
 import kg.bitruby.usersservice.api.model.GenerateOtpCodeLoginResult;
 import kg.bitruby.usersservice.api.model.OtpCodeLogin;
-import kg.bitruby.usersservice.core.otp.OtpService;
+import kg.bitruby.usersservice.core.login.LoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +13,9 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class OtpLoginController implements OtpLoginApiDelegate {
+public class LoginController implements LoginApiDelegate {
 
-  private final OtpService otpService;
+  private final LoginService loginService;
 
   /**
    * POST /public/generate-otp/login : Generate and send OTP code for login
@@ -28,7 +28,7 @@ public class OtpLoginController implements OtpLoginApiDelegate {
   @Override
   public ResponseEntity<GenerateOtpCodeLoginResult> generateOtpCodeForLogin(UUID xRequestId,
       OtpCodeLogin otpCodeLogin) {
-    return new ResponseEntity<>(otpService.generateOtpCodeForLogin(otpCodeLogin), HttpStatus.OK);
+    return new ResponseEntity<>(loginService.generateOtpCodeForLogin(otpCodeLogin), HttpStatus.OK);
 
   }
 }

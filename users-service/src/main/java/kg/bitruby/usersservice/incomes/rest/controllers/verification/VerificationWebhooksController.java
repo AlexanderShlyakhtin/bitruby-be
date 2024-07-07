@@ -1,6 +1,6 @@
-package kg.bitruby.usersservice.incomes.rest.controllers.webhooks;
+package kg.bitruby.usersservice.incomes.rest.controllers.verification;
 
-import kg.bitruby.usersservice.api.VerificationApiDelegate;
+import kg.bitruby.usersservice.api.VerificationWebhooksApiDelegate;
 import kg.bitruby.usersservice.api.model.Base;
 import kg.bitruby.usersservice.api.model.VerificationDecision;
 import kg.bitruby.usersservice.api.model.VerificationEvent;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class VerificationWebhooksController implements VerificationApiDelegate {
+public class VerificationWebhooksController implements VerificationWebhooksApiDelegate {
 
   private final VerificationService verificationService;
 

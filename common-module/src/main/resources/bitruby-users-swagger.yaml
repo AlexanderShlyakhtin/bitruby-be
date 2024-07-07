@@ -7,10 +7,10 @@ servers:
   - url: /api/v1
     description: The URL prefix for API server
 tags:
-  - name: users
-  - name: otp-registration
-  - name: otp-restore-password
-  - name: otp-login
+  - name: registration
+  - name: restore-password
+  - name: login
+  - name: verification
 
 paths:
   /public/registration:
@@ -20,7 +20,7 @@ paths:
       summary: Register new user
       operationId: registerUser
       tags:
-        - users
+        - registration
       requestBody:
         $ref: '#/components/requestBodies/RegisterNewUserRequest'
       responses:
@@ -41,7 +41,7 @@ paths:
         $ref: '#/components/requestBodies/CompleteRegistrationRequest'
       operationId: completeRegistration
       tags:
-        - users
+        - registration
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
@@ -49,7 +49,23 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-
+  /public/generate-otp/registration:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Generate and send OTP code for Registration
+      operationId: generateOtpCodeForRegistration
+      tags:
+        - registration
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateOtpCodeRegistrationRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
   /public/restore-password:
     parameters:
       - $ref: '#/components/parameters/RequestId'
@@ -61,7 +77,41 @@ paths:
         $ref: '#/components/requestBodies/RestorePasswordRequest'
       operationId: restorePassword
       tags:
-        - users
+        - restore-password
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+  /public/generate-otp/restore-password:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Generate and send OTP code for Restoring the password
+      operationId: generateOtpCodeForRestoringPassword
+      tags:
+        - restore-password
+      requestBody:
+        $ref: '#/components/requestBodies/GenerateOtpCodeRestorePasswordRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/RestorePasswordRequestOtpResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '5XX':
+          $ref: '#/components/responses/InternalServerError'
+  /public/generate-otp/restore-password/check:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Check generatred OTP code to Restore user the password
+      operationId: checkOtpCodeForRestoringPassword
+      tags:
+        - restore-password
+      requestBody:
+        $ref: '#/components/requestBodies/CheckOtpCodeRestorePasswordRequest'
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
@@ -80,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/UserFormRequest'
       operationId: applyUserForm
       tags:
-        - users
+        - verification
       responses:
         '200':
           $ref: '#/components/responses/EmptyResponse'
@@ -97,7 +147,7 @@ paths:
         Get user verification data
       operationId: getUserVerificationData
       tags:
-        - users
+        - verification
       responses:
         '200':
           $ref: '#/components/responses/UserVerificationResponse'
@@ -112,7 +162,7 @@ paths:
       summary: Generate and send OTP code for login
       operationId: generateOtpCodeForLogin
       tags:
-        - otp-login
+        - login
       requestBody:
         $ref: '#/components/requestBodies/GenerateOtpCodeLoginRequest'
       responses:
@@ -122,57 +172,8 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-  /public/generate-otp/registration:
-    parameters:
-      - $ref: '#/components/parameters/RequestId'
-    post:
-      summary: Generate and send OTP code for Registration
-      operationId: generateOtpCodeForRegistration
-      tags:
-        - otp-registration
-      requestBody:
-        $ref: '#/components/requestBodies/GenerateOtpCodeRegistrationRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/EmptyResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '5XX':
-          $ref: '#/components/responses/InternalServerError'
-  /public/generate-otp/restore-password:
-    parameters:
-      - $ref: '#/components/parameters/RequestId'
-    post:
-      summary: Generate and send OTP code for Restoring the password
-      operationId: generateOtpCodeForRestoringPassword
-      tags:
-        - otp-restore-password
-      requestBody:
-        $ref: '#/components/requestBodies/GenerateOtpCodeRestorePasswordRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/RestorePasswordRequestOtpResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '5XX':
-          $ref: '#/components/responses/InternalServerError'
-  /public/generate-otp/restore-password/check:
-    parameters:
-      - $ref: '#/components/parameters/RequestId'
-    post:
-      summary: Check generatred OTP code to Restore user the password
-      operationId: checkOtpCodeForRestoringPassword
-      tags:
-        - otp-restore-password
-      requestBody:
-        $ref: '#/components/requestBodies/CheckOtpCodeRestorePasswordRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/EmptyResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '5XX':
-          $ref: '#/components/responses/InternalServerError'
+
+
 components:
   responses:
     UserVerificationResponse:
