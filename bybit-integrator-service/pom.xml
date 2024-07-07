@@ -29,6 +29,7 @@
             <groupId>kg.bitRuby</groupId>
             <artifactId>common-module</artifactId>
             <version>${version-common-module}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

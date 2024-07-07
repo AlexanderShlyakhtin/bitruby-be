@@ -2,7 +2,7 @@ package kg.bitruby.usersservice.incomes.rest.controllers.restorepassword;
 
 import kg.bitruby.usersservice.api.RestorePasswordApiDelegate;
 import kg.bitruby.usersservice.api.model.*;
-import kg.bitruby.usersservice.core.restorepassword.RestorePasswordService;
+import kg.bitruby.usersservice.core.logic.restorepassword.RestorePasswordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

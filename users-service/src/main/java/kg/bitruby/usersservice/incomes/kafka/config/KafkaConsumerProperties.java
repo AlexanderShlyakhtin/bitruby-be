@@ -11,4 +11,7 @@ public class KafkaConsumerProperties {
 
   @Value("${bitruby.kafka.topics.verification.decisions.name}")
   public String verificationDecisions;
+
+  @Value("${bitruby.kafka.topics.users.user-status.name}")
+  public String userStatusChanged;
 }

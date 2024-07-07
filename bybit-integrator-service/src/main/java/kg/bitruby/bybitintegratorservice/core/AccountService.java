@@ -4,16 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.bybitintegratorservice.api.model.AccountApiKey;
 import kg.bitruby.bybitintegratorservice.client.bybit.api.model.*;
 import kg.bitruby.bybitintegratorservice.common.util.StrongPasswordGenerator;
+import kg.bitruby.bybitintegratorservice.outcomes.kafka.service.KafkaProducerService;
 import kg.bitruby.bybitintegratorservice.outcomes.postgres.entity.AccountEntity;
 import kg.bitruby.bybitintegratorservice.outcomes.postgres.repository.AccountRepository;
 import kg.bitruby.bybitintegratorservice.outcomes.redis.domain.AccountApiKeyEntity;
 import kg.bitruby.bybitintegratorservice.outcomes.redis.repository.AccountApiKeyRepository;
 import kg.bitruby.bybitintegratorservice.outcomes.rest.bybit.api.ByBitApiClient;
 import kg.bitruby.bybitintegratorservice.outcomes.rest.bybit.service.ByBitMapperService;
-import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
+import kg.bitruby.commonmodule.domain.ChangeUserAccountEvent;
+import kg.bitruby.commonmodule.dto.kafkaevents.CreateSubAccountDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusChangedDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -29,24 +33,43 @@ public class AccountService {
   private final ByBitApiClient byBitApiClient;
   private final AccountApiKeyRepository accountApiKeyRepository;
   private final ObjectMapper objectMapper;
+  private final KafkaProducerService kafkaProducerService;
 
 
+  @Transactional(transactionManager = "transactionManager")
   public void handleCreateSubAccountEvent(CreateSubAccountDto event) {
-    AccountEntity accountEntity = new AccountEntity();
-    accountEntity.setUserId(event.getUserId());
-    accountEntity.setUsername("" + OffsetDateTime.now().toInstant().getEpochSecond() );
-    accountEntity.setMemberType(CreateSubMember.MemberTypeEnum.NUMBER_1.getValue());
-    accountEntity.setSwitchValue(CreateSubMember.SwitchEnum.NUMBER_0.getValue());
-    accountEntity.setIsUta(true);
-    accountEntity.setPassword(strongPasswordGenerator.generateStrongPassword(30));
+    accountRepository.findByUserId(event.getUserId())
+        .ifPresentOrElse(
+            accountEntity -> {
+            },
+            () -> {
+              AccountEntity accountEntity = new AccountEntity();
+              accountEntity.setUserId(event.getUserId());
+              accountEntity.setUsername("" + OffsetDateTime.now().toInstant().getEpochSecond() );
+              accountEntity.setMemberType(CreateSubMember.MemberTypeEnum.NUMBER_1.getValue());
+              accountEntity.setSwitchValue(CreateSubMember.SwitchEnum.NUMBER_0.getValue());
+              accountEntity.setIsUta(true);
+              accountEntity.setIsActive(false);
+              accountEntity.setPassword(strongPasswordGenerator.generateStrongPassword(30));
 
-    CreateSubAccountResult subAccount =
-        byBitApiClient.createSubAccount(byBitMapperService.map(accountEntity));
-    if(subAccount.getResult() != null) {
-      accountEntity.setBybitUid(subAccount.getResult().getUid());
-      accountEntity.setIsActive(true);
-    }
-    accountRepository.save(accountEntity);
+              CreateSubAccountResult subAccount =
+                  byBitApiClient.createSubAccount(byBitMapperService.map(accountEntity));
+              if(subAccount.getResult() != null && subAccount.getResult().getUid() != null) {
+                accountEntity.setBybitUid(subAccount.getResult().getUid());
+                accountEntity.setIsActive(true);
+                kafkaProducerService.emitUserAccountStatusChangedEventMessage(UserStatusChangedDto
+                    .builder()
+                    .userId(event.getUserId())
+                    .newAccountStatus(ChangeUserAccountEvent.BYBIT_ACCOUNT_CREATED)
+                    .build()
+                );
+              }
+              accountRepository.save(accountEntity);
+            }
+        );
+
+
+
   }
 
   public AccountApiKey getApiKeySubAccount(UUID id) {

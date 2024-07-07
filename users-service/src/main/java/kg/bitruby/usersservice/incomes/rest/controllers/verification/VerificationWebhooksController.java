@@ -4,7 +4,7 @@ import kg.bitruby.usersservice.api.VerificationWebhooksApiDelegate;
 import kg.bitruby.usersservice.api.model.Base;
 import kg.bitruby.usersservice.api.model.VerificationDecision;
 import kg.bitruby.usersservice.api.model.VerificationEvent;
-import kg.bitruby.usersservice.core.verification.VerificationService;
+import kg.bitruby.usersservice.core.logic.verification.VerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

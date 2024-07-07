@@ -1,8 +1,8 @@
 package kg.bitruby.usersservice.incomes.rest.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.usersservice.core.verification.HmacVerifier;
-import kg.bitruby.usersservice.core.verification.VerificationService;
+import kg.bitruby.usersservice.core.logic.verification.HmacVerifier;
+import kg.bitruby.usersservice.core.logic.verification.VerificationService;
 import kg.bitruby.usersservice.incomes.rest.interceptors.CheckHMacSignatureInterceptor;
 import kg.bitruby.usersservice.incomes.rest.interceptors.HeaderInterceptor;
 import kg.bitruby.usersservice.incomes.rest.interceptors.TokenInterceptor;

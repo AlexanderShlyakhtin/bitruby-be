@@ -11,6 +11,8 @@ tags:
 
 paths:
   /oauth2/introspect:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Introspect token access token
       operationId: introspectAccessToken
@@ -28,6 +30,8 @@ paths:
         '5XX':
           $ref: '#/components/responses/Error'
   /oauth2/token:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
     post:
       summary: Get access and refresh token by user password
       operationId: getTokenByUserPassword
@@ -47,8 +51,30 @@ paths:
           $ref: '#/components/responses/Error'
         '5XX':
           $ref: '#/components/responses/Error'
+  /oauth2/otp:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      summary: Generate and send OTP code for login
+      operationId: generateOtpCodeForLogin
+      security:
+        - basicAuth: []
+      tags:
+        - auth
+      requestBody:
+        $ref: '#/components/requestBodies/OtpLoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/OtpLoginResponse'
 components:
   parameters:
+    RequestId:
+      name: x-request-id
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
     GrantType:
       name: grant_type
       in: query
@@ -62,16 +88,26 @@ components:
       schema:
         type: string
   responses:
-
     Error:
       description: error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    EmptyResponse:
-      description: >-
-        response with no body
+    OtpLoginResponse:
+      description: error
+      headers:
+        x-request-id:
+          required: true
+          description: >-
+            Сквозной идентификатор запроса
+          schema:
+            type: string
+            format: uuid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpLoginResult'
     TokenResponse:
       description: >-
         Token
@@ -87,6 +123,13 @@ components:
           schema:
             $ref: '#/components/schemas/IntrospectToken'
   requestBodies:
+    OtpLoginRequest:
+      description: >-
+        Generate OTP token for user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OtpLogin'
     IntrospectTokenRequest:
       description: >-
         Get token by grant type and password
@@ -146,6 +189,24 @@ components:
       description: Use `user` / `passwd` as the test credentials
 
   schemas:
+    Id:
+      type: string
+      format: uuid
+    Base:
+      type: object
+      required:
+        - success
+        - timestamp
+      properties:
+        success:
+          type: boolean
+          description: >-
+            Влад сказал, что параметр обязательный для сервисов на ГО
+        timestamp:
+          type: string
+          format: date-time
+          description: >-
+            Время отправки ответа на запрос
     Error:
       type: object
       properties:
@@ -195,3 +256,33 @@ components:
       properties:
         active:
           type: boolean
+    OtpCode:
+      type: object
+      required:
+        - grant_type
+        - sendTo
+      properties:
+        grant_type:
+          $ref: '#/components/schemas/GrantType'
+        sendTo:
+          type: string
+          nullable: false
+    OtpLogin:
+      allOf:
+        - $ref: '#/components/schemas/OtpCode'
+        - type: object
+          required:
+            - password
+          properties:
+            password:
+              type: string
+              format: password
+    OtpLoginResult:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          required:
+            - loginId
+          properties:
+            loginId:
+              $ref: '#/components/schemas/Id'

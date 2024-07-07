@@ -83,6 +83,11 @@ bitruby:
           name: "create-sub-account"
           numPartitions: 1
           replicationFactor: 1
+      users:
+        user-status:
+          name: "user-status-changed"
+          numPartitions: 1
+          replicationFactor: 1
 
 
 

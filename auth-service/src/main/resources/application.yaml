@@ -1,6 +1,9 @@
 logging:
   level:
-    org.springframework.security: TRACE
+    org:
+      springframework.security: TRACE
+      springframework.web: trace
+
 spring:
   application:
     name: authorization-server
@@ -21,6 +24,15 @@ spring:
     redis:
       host: localhost
       port: 6379
+  kafka:
+    bootstrap-servers: localhost:29092
+    properties:
+      enable.idempotence: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: "bitruby-auth-service"
 server:
   port: 9000
   servlet:
@@ -37,4 +49,15 @@ bitruby:
   auth:
     client-id: ''
     client-secret: ''
+  users-service:
+    db:
+      schema: users
+  kafka:
+    topics:
+      otp:
+        login:
+          name: "otp-login"
+          numPartitions: 1
+          replicationFactor: 1
+
 

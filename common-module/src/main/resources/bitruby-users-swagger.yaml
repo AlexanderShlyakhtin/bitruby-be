@@ -9,7 +9,6 @@ servers:
 tags:
   - name: registration
   - name: restore-password
-  - name: login
   - name: verification
 
 paths:
@@ -155,25 +154,6 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '5XX':
           $ref: '#/components/responses/InternalServerError'
-  /public/generate-otp/login:
-    parameters:
-      - $ref: '#/components/parameters/RequestId'
-    post:
-      summary: Generate and send OTP code for login
-      operationId: generateOtpCodeForLogin
-      tags:
-        - login
-      requestBody:
-        $ref: '#/components/requestBodies/GenerateOtpCodeLoginRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/GenerateOtpCodeLoginResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-        '5XX':
-          $ref: '#/components/responses/InternalServerError'
-
-
 components:
   responses:
     UserVerificationResponse:
@@ -210,20 +190,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-    GenerateOtpCodeLoginResponse:
-      description: error
-      headers:
-        x-request-id:
-          required: true
-          description: >-
-            Сквозной идентификатор запроса
-          schema:
-            type: string
-            format: uuid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/GenerateOtpCodeLoginResult'
     RegisterNewUserResponse:
       description: error
       headers:
@@ -284,13 +250,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserForm'
-    GenerateOtpCodeLoginRequest:
-      description: >-
-        Generate OTP token for user login
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/OtpCodeLogin'
     GenerateOtpCodeRegistrationRequest:
       description: >-
         Generate OTP token for user registration
@@ -521,17 +480,6 @@ components:
             otp:
               $ref: '#/components/schemas/Otp'
         - $ref: '#/components/schemas/OtpCode'
-
-    OtpCodeLogin:
-      allOf:
-        - $ref: '#/components/schemas/OtpCode'
-        - type: object
-          required:
-            - password
-          properties:
-            password:
-              type: string
-              format: password
     RestorePassword:
       allOf:
         - type: object
@@ -588,15 +536,6 @@ components:
             - restorePasswordId
           properties:
             restorePasswordId:
-              $ref: '#/components/schemas/Id'
-    GenerateOtpCodeLoginResult:
-      allOf:
-        - $ref: '#/components/schemas/Base'
-        - type: object
-          required:
-            - loginId
-          properties:
-            loginId:
               $ref: '#/components/schemas/Id'
     GenerateOtpCodeRegistration:
       allOf:

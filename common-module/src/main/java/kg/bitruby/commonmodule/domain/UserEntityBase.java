@@ -1,9 +1,6 @@
 package kg.bitruby.commonmodule.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +12,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 @MappedSuperclass
 public class UserEntityBase implements Serializable {
+  @Version
+  @Column(name = "version", nullable = false)
+  private Long version = Long.MIN_VALUE;
   @Column(name = "phone", length = 100, nullable = false)
   private String phone;
   @Column(name = "email", nullable = false, unique = true)

@@ -16,13 +16,6 @@ public class KafkaTopicsConfig {
   @Value("${spring.kafka.bootstrap-servers}")
   private String bootstrapServers;
 
-  @Value("${bitruby.kafka.topics.otp.login.name}")
-  private String otpLoginTopic;
-  @Value("${bitruby.kafka.topics.otp.login.numPartitions}")
-  private int otpLoginTopicNumPartitions;
-  @Value("${bitruby.kafka.topics.otp.login.replicationFactor}")
-  private short otpLoginTopicReplicationFactor;
-
   @Value("${bitruby.kafka.topics.otp.registration.name}")
   private String otpRegistrationTopic;
   @Value("${bitruby.kafka.topics.otp.registration.numPartitions}")
@@ -65,6 +58,12 @@ public class KafkaTopicsConfig {
   @Value("${bitruby.kafka.topics.bybit.create-sub-account.replicationFactor}")
   private short createSubAccountTopicReplicationFactor;
 
+  @Value("${bitruby.kafka.topics.users.user-status.name}")
+  private String userStatusChangedTopic;
+  @Value("${bitruby.kafka.topics.users.user-status.numPartitions}")
+  private int userStatusChangedTopicNumPartitions;
+  @Value("${bitruby.kafka.topics.users.user-status.replicationFactor}")
+  private short userStatusChangedTopicReplicationFactor;
 
   // Configure KafkaAdmin bean
   @Bean
@@ -78,12 +77,6 @@ public class KafkaTopicsConfig {
     Map<String, Object> config = new HashMap<>();
     config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
     return config;
-  }
-
-  @Bean
-  public NewTopic otpLoginTopic() {
-    return new NewTopic(otpLoginTopic, otpLoginTopicNumPartitions,
-        otpLoginTopicReplicationFactor);
   }
 
   @Bean
@@ -120,5 +113,11 @@ public class KafkaTopicsConfig {
   public NewTopic createSubAccountTopic() {
     return new NewTopic(createSubAccountTopic, createSubAccountTopicNumPartitions,
         createSubAccountTopicReplicationFactor);
+  }
+
+  @Bean
+  public NewTopic userStatusChangedTopic() {
+    return new NewTopic(userStatusChangedTopic, userStatusChangedTopicNumPartitions,
+        userStatusChangedTopicReplicationFactor);
   }
 }

@@ -2,7 +2,7 @@ package kg.bitruby.usersservice.outcomes.kafka.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.events.*;
+import kg.bitruby.commonmodule.dto.kafkaevents.*;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.common.AppContextHolder;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,6 @@ public class KafkaProducerService {
   private final KafkaTemplate<String, String> kafkaTemplate;
   private final ObjectMapper objectMapper;
 
-  @Value("${bitruby.kafka.topics.otp.login.name}")
-  private String otpLogin;
-
   @Value("${bitruby.kafka.topics.otp.registration.name}")
   private String otpRegistration;
 
@@ -42,16 +39,6 @@ public class KafkaProducerService {
 
   @Value("${bitruby.kafka.topics.bybit.create-sub-account.name}")
   private String createSubAccountTopic;
-
-  public void emitOtpLoginEventMessage(OtpEventDto event) {
-    ProducerRecord<String, String> producerRecord = new ProducerRecord<>(
-        otpLogin,
-        null,
-        AppContextHolder.getContextRequestId().toString(),
-        convertObjectToJson(event)
-    );
-    kafkaTemplate.send(producerRecord);
-  }
 
   public void emitOtpRegistrationEventMessage(OtpEventDto event) {
     ProducerRecord<String, String> producerRecord = new ProducerRecord<>(

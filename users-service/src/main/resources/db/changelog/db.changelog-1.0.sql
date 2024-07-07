@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS users.users
 (
     user_id            uuid         not null PRIMARY KEY,
+    version            BIGINT       not null,
     phone              varchar(100) not null,
     email              varchar(255) not null,
     password           varchar(255) not null,

@@ -3,7 +3,7 @@ package kg.bitruby.bybitintegratorservice.incomes.kafka.listener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.bybitintegratorservice.common.AppContextHolder;
 import kg.bitruby.bybitintegratorservice.core.AccountService;
-import kg.bitruby.commonmodule.dto.events.CreateSubAccountDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.CreateSubAccountDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -24,7 +23,6 @@ public class KafkaListenerService {
   private final AccountService accountService;
 
   @KafkaListener(topics = "#{kafkaConsumerProperties.createSubAccountTopic}")
-  @Transactional("transactionManager")
   public void listenToVerificationEventsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);

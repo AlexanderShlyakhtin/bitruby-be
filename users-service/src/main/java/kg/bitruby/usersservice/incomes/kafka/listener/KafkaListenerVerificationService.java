@@ -1,18 +1,17 @@
 package kg.bitruby.usersservice.incomes.kafka.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.events.VerificationDecisionDto;
-import kg.bitruby.commonmodule.dto.events.VerificationEventDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.VerificationDecisionDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.VerificationEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.common.AppContextHolder;
-import kg.bitruby.usersservice.core.verification.VerificationService;
+import kg.bitruby.usersservice.core.logic.verification.VerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -25,7 +24,6 @@ public class KafkaListenerVerificationService {
   private final VerificationService verificationService;
 
   @KafkaListener(topics = "#{kafkaConsumerProperties.verificationEvents}")
-  @Transactional("transactionManager")
   public void listenToVerificationEventsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);
@@ -34,7 +32,6 @@ public class KafkaListenerVerificationService {
   }
 
   @KafkaListener(topics = "#{kafkaConsumerProperties.verificationDecisions}")
-  @Transactional("transactionManager")
   public void listenToVerificationDecisionsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);

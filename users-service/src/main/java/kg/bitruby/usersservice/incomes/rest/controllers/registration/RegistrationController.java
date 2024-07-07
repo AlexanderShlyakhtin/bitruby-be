@@ -3,7 +3,7 @@ package kg.bitruby.usersservice.incomes.rest.controllers.registration;
 import kg.bitruby.usersservice.api.RegistrationApi;
 import kg.bitruby.usersservice.api.RegistrationApiDelegate;
 import kg.bitruby.usersservice.api.model.*;
-import kg.bitruby.usersservice.core.registration.RegistrationService;
+import kg.bitruby.usersservice.core.logic.registration.RegistrationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

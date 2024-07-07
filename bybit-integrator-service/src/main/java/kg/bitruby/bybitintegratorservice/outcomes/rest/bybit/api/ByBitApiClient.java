@@ -46,8 +46,7 @@ public class ByBitApiClient {
     if(Boolean.TRUE.equals(active)) {
       long epochMilli = System.currentTimeMillis();
       return safeCall(() -> accountApi.createSubAccount(
-          byBitSignatureService.signPost(createSubMember, epochMilli), apiKey, epochMilli,
-          recvWindow, createSubMember));
+          byBitSignatureService.signPost(createSubMember, epochMilli), apiKey, epochMilli, recvWindow, createSubMember));
     } else {
       return new CreateSubAccountResult();
     }

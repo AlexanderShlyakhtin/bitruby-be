@@ -16,6 +16,10 @@ public class AccountEntity {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @Version
+  @Column(name = "version", nullable = false)
+  private Long version;
+
   @Column(name = "user_id", unique = true, nullable = false)
   private UUID userId;
 

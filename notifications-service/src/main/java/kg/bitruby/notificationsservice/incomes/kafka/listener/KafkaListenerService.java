@@ -1,7 +1,7 @@
 package kg.bitruby.notificationsservice.incomes.kafka.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.events.OtpEventDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.OtpEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.notificationsservice.common.AppContextHolder;
 import kg.bitruby.notificationsservice.core.NotificationService;
