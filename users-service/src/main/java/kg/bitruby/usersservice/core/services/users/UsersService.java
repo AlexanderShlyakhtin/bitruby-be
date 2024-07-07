@@ -1,7 +1,7 @@
 package kg.bitruby.usersservice.core.services.users;
 
 import kg.bitruby.commonmodule.domain.AccountStatus;
-import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusChangedDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.api.model.GrantType;
 import kg.bitruby.usersservice.outcomes.postgres.domain.UserEntity;
@@ -43,7 +43,7 @@ public class UsersService {
   }
 
   @Transactional(transactionManager = "transactionManager")
-  public void handleChangeUserAccountEvents(UserStatusChangedDto event) {
+  public void handleChangeUserAccountEvents(UserStatusEventDto event) {
     UserEntity userEntity = findUserById(event.getUserId());
     switch (event.getNewAccountStatus()) {
       case BYBIT_ACCOUNT_CREATED -> {

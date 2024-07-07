@@ -1,7 +1,7 @@
 package kg.bitruby.usersservice.incomes.kafka.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusChangedDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import kg.bitruby.usersservice.common.AppContextHolder;
 import kg.bitruby.usersservice.core.services.users.UsersService;
@@ -26,7 +26,7 @@ public class KafkaListenerUsersService {
   public void listenToChangeUserAccountEventsTopic(@Header(KafkaHeaders.RECEIVED_KEY) String key, String payload) {
     AppContextHolder.setRqUid(UUID.fromString(key));
     log.info("Kafka event value: {}", payload);
-    UserStatusChangedDto event = mapObject(payload, UserStatusChangedDto.class);
+    UserStatusEventDto event = mapObject(payload, UserStatusEventDto.class);
     usersService.handleChangeUserAccountEvents(event);
   }
 

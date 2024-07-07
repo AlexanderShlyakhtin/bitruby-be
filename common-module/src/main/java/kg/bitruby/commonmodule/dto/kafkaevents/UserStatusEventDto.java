@@ -1,6 +1,6 @@
 package kg.bitruby.commonmodule.dto.kafkaevents;
 
-import kg.bitruby.commonmodule.domain.ChangeUserAccountEvent;
+import kg.bitruby.commonmodule.domain.EventType;
 import lombok.*;
 
 import java.util.UUID;
@@ -10,10 +10,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserStatusChangedDto {
+public class UserStatusEventDto {
 
   private UUID userId;
-  private ChangeUserAccountEvent newAccountStatus;
+  private EventType newAccountStatus;
 
 }
 

@@ -11,9 +11,9 @@ import kg.bitruby.bybitintegratorservice.outcomes.redis.domain.AccountApiKeyEnti
 import kg.bitruby.bybitintegratorservice.outcomes.redis.repository.AccountApiKeyRepository;
 import kg.bitruby.bybitintegratorservice.outcomes.rest.bybit.api.ByBitApiClient;
 import kg.bitruby.bybitintegratorservice.outcomes.rest.bybit.service.ByBitMapperService;
-import kg.bitruby.commonmodule.domain.ChangeUserAccountEvent;
+import kg.bitruby.commonmodule.domain.EventType;
 import kg.bitruby.commonmodule.dto.kafkaevents.CreateSubAccountDto;
-import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusChangedDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,10 +57,17 @@ public class AccountService {
               if(subAccount.getResult() != null && subAccount.getResult().getUid() != null) {
                 accountEntity.setBybitUid(subAccount.getResult().getUid());
                 accountEntity.setIsActive(true);
-                kafkaProducerService.emitUserAccountStatusChangedEventMessage(UserStatusChangedDto
+                kafkaProducerService.emitUserAccountStatusChangedEventMessage(UserStatusEventDto
                     .builder()
                     .userId(event.getUserId())
-                    .newAccountStatus(ChangeUserAccountEvent.BYBIT_ACCOUNT_CREATED)
+                    .newAccountStatus(EventType.BYBIT_ACCOUNT_CREATED)
+                    .build()
+                );
+              } else {
+                kafkaProducerService.emitUserAccountStatusChangedEventMessage(UserStatusEventDto
+                    .builder()
+                    .userId(event.getUserId())
+                    .newAccountStatus(EventType.BYBIT_ACCOUNT_NOT_CREATED.BYBIT_ACCOUNT_NOT_CREATED)
                     .build()
                 );
               }

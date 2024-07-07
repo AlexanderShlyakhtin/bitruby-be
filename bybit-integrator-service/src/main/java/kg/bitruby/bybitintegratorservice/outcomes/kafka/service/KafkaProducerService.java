@@ -3,7 +3,7 @@ package kg.bitruby.bybitintegratorservice.outcomes.kafka.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kg.bitruby.bybitintegratorservice.common.AppContextHolder;
-import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusChangedDto;
+import kg.bitruby.commonmodule.dto.kafkaevents.UserStatusEventDto;
 import kg.bitruby.commonmodule.exceptions.BitrubyRuntimeExpection;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -21,7 +21,7 @@ public class KafkaProducerService {
   @Value("${bitruby.kafka.topics.users.user-status.name}")
   private String userAccountStatusChangedTopic;
 
-  public void emitUserAccountStatusChangedEventMessage(UserStatusChangedDto event) {
+  public void emitUserAccountStatusChangedEventMessage(UserStatusEventDto event) {
     ProducerRecord<String, String> producerRecord = new ProducerRecord<>(
         userAccountStatusChangedTopic,
         null,
